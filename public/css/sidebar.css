@@ -1,0 +1,115 @@
+.sidebar {
+    position: fixed;
+    top: 65px;
+    left: 0;
+    /* width: var(--sidebar-width); */
+    height: calc(100vh - 65px);
+    background: #0b0b0b;
+    transition: .2s;
+    overflow: visible;
+    color: #fff;
+    z-index: 1000;
+    border-right: 1px solid rgba(255, 255, 255, .04)
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed);
+}
+
+.sidebar-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 18px 16px;
+    margin-top: 12px;
+    margin-bottom: 18px;
+}
+
+.sidebar .logo img {
+    width: 125px;
+    transition: .2s;
+}
+
+.sidebar.collapsed .logo img {
+    width: 42px;
+}
+
+.toggle-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    background: #e60000;
+    /* rojo */
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+    transition: transform .2s ease;
+}
+
+.toggle-btn i {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Bottom positioned toggle */
+.toggle-btn-bottom {
+    position: absolute;
+    bottom: 20px;
+    right: -18px;
+    /* sit slightly outside the sidebar edge (narrower) */
+    z-index: 1001;
+}
+
+.sidebar.collapsed .toggle-btn-bottom {
+    right: -14px;
+    transform: translateX(0);
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 22px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background: rgba(230, 0, 0, 0.06);
+    /* ligero rojo */
+}
+
+.sidebar a i {
+    width: 22px;
+    text-align: center;
+    color: #e60000;
+    /* iconos en rojo */
+}
+
+.sidebar.collapsed a span {
+    display: none;
+}
+
+.sidebar.collapsed a {
+    justify-content: center;
+    padding: 16px 0;
+}
+
+/* Small screen adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        top: 65px;
+        height: calc(100vh - 65px);
+        z-index: 1002
+    }
+}
