@@ -46,12 +46,13 @@ class FacturaController
     public function sincronizar()
     {
         $model = new FacturaModel();
-        $facturas = $model->guardarFacturasHoy();
+        $result = $model->guardarFacturasHoy();
 
         header('Content-Type: application/json');
         echo json_encode([
-            'facturas' => $facturas,
-            'inserted_count' => count($facturas),
+            'facturas' => $result['inserted'],
+            'inserted_count' => count($result['inserted']),
+            'consulted_count' => count($result['consulted']),
         ], JSON_PRETTY_PRINT);
     }
 }

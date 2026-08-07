@@ -46,6 +46,7 @@ $facturas = $model->getFacturasAbiertasHoy();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reposiciones</title>
+    <link rel="icon" type="image/png" href="https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_32,h_32/https://darwinandwolf.com/wp-content/uploads/2025/12/Fav-50x50.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
@@ -75,6 +76,58 @@ $facturas = $model->getFacturasAbiertasHoy();
         }
         .btn-cerrar {
             color: #198754;
+        }
+        table thead th,
+        table tbody td {
+            text-align: center;
+        }
+        table tbody td.acciones {
+            text-align: left;
+        }
+        .acciones {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        .btn-ver,
+        .btn-cerrar {
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color .2s ease, transform .2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        }
+        .btn-ver {
+            background-color: #a5c8e8 !important;
+            color: #0f2f4d;
+        }
+        .btn-ver:hover {
+            background-color: #000000 !important;
+        }
+        .btn-ver:hover i {
+            color: #ff4d4d !important;
+        }
+        .btn-cerrar {
+            background-color: #c7e5d2 !important;
+            color: #ffffff;
+        }
+        .btn-cerrar i {
+            color: #ffffff !important;
+        }
+        .btn-cerrar:hover {
+            background-color: #000000 !important;
+        }
+        .btn-cerrar:hover i {
+            color: #ff4d4d !important;
         }
         .modal-overlay {
             position: fixed;
@@ -111,14 +164,20 @@ $facturas = $model->getFacturasAbiertasHoy();
             font-size: 1.25rem;
         }
         .btn-close-modal {
+            width: 40px;
+            height: 40px;
             border: none;
-            background: transparent;
+            background: #dc2626;
             font-size: 1.25rem;
             cursor: pointer;
-            color: #666;
+            color: #ffffff;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-close-modal:hover {
-            color: #000;
+            background: #b91c1c;
         }
         .modal-actions {
             margin-top: 1rem;
@@ -142,20 +201,43 @@ $facturas = $model->getFacturasAbiertasHoy();
             cursor: not-allowed;
             opacity: 0.75;
         }
-        .btn-mark-detail {
-            width: 2.25rem;
-            height: 2.25rem;
+        .btn-mark-detail,
+        .btn-remove-detail {
+            min-width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: #198754;
-            color: #fff;
+            color: #ffffff;
             border: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: background-color .2s ease, transform .2s ease;
+            width: auto !important;
+        }
+        .btn-mark-detail {
+            background: #22c55e;
+        }
+        .btn-mark-detail:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
         }
         .btn-mark-detail.disabled {
             background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+        .btn-remove-detail {
+            background: #ef4444;
+        }
+        .btn-remove-detail:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        .btn-mark-detail.disabled + .btn-remove-detail,
+        .btn-remove-detail.disabled {
+            background: #e5e7eb;
             cursor: not-allowed;
             opacity: 0.75;
         }
@@ -280,9 +362,14 @@ $facturas = $model->getFacturasAbiertasHoy();
                                         <td>${detalle.descripcion ?? '-'}</td>
                                         <td>${detalle.estado == 0 ? 'Abierto' : 'Repuesto'}</td>
                                         <td>
-                                            <button type="button" class="btn-mark-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como repuesto">
-                                                <i class="fa-solid fa-check"></i>
-                                            </button>
+                                            <div class="detalle-actions" style="display:inline-flex; gap:0.5rem; align-items:center;">
+                                                <button type="button" class="btn-mark-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como repuesto">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                                <button type="button" class="btn-remove-detail" title="Eliminar detalle">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>`).join('')
                                 : '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
@@ -341,6 +428,7 @@ $facturas = $model->getFacturasAbiertasHoy();
             });
         });
     </script>
+    <script src="../public/js/menu.js"></script>
 </body>
 
 </html>

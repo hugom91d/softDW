@@ -46,11 +46,11 @@ function initSyncOverlay() {
             progressBar.style.display = 'none';
         }
 
-        if (apiResult) {
+        if (apiResult !== null) {
             resultsCard.style.display = 'block';
 
             if (apiResult.length > 0) {
-                resultsSummary.textContent = `Facturas encontradas para la fecha de hoy (${fechaHoy}): ${apiResult.length}`;
+                resultsSummary.textContent = `Facturas sincronizadas para la fecha de hoy (${fechaHoy}): ${apiResult.length}`;
                 resultsBody.innerHTML = apiResult
                     .map((factura, index) => `
                         <tr>
@@ -62,7 +62,7 @@ function initSyncOverlay() {
                     .join('');
                 noResultsMessage.style.display = 'none';
             } else {
-                resultsSummary.textContent = `Facturas encontradas para la fecha de hoy (${fechaHoy}): 0`;
+                resultsSummary.textContent = `Facturas sincronizadas para la fecha de hoy (${fechaHoy}): 0`;
                 resultsBody.innerHTML = '';
                 noResultsMessage.style.display = 'block';
             }

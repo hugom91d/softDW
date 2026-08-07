@@ -191,7 +191,8 @@ class FacturaModel
         $inserted = [];
 
         foreach ($facturas as $factura) {
-            if (($factura['cliente']['nombre_comercial'] ?? '') === 'GPS BUSINESS S.A.S.') {
+            // if (($factura['cliente']['nombre_comercial'] ?? '') === 'GPS BUSINESS S.A.S.') {
+            if (strpos($factura['documento'] ?? '', '002-002') !== false) {
                 continue;
             }
 
@@ -209,7 +210,9 @@ class FacturaModel
             $inserted[] = $factura;
         }
 
-        return $inserted;
+        return [
+            'consulted' => $facturas,
+            'inserted' => $inserted,
+        ];
     }
 }
-

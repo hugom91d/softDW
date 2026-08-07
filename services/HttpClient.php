@@ -27,7 +27,9 @@ class HttpClient
 
         $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        curl_close($curl);
+        if (function_exists('curl_close')) {
+            @curl_close($curl);
+        }
 
         return [
             'http_code' => $httpCode,

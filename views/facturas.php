@@ -12,6 +12,7 @@ if (!isset($_SESSION['cedula'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturas</title>
+    <link rel="icon" type="image/png" href="https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_32,h_32/https://darwinandwolf.com/wp-content/uploads/2025/12/Fav-50x50.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
@@ -55,7 +56,8 @@ if (!isset($_SESSION['cedula'])) {
                     <?php if (!empty($facturas)): ?>
                         <?php $contador = 0; ?>
                         <?php foreach ($facturas as $factura): ?>
-                            <?php if ($factura['cliente']['nombre_comercial'] != 'GPS BUSINESS S.A.S.') { ?>
+                            <?php //if ($factura['cliente']['nombre_comercial'] != 'GPS BUSINESS S.A.S.') { 
+                                if (strpos($factura['documento'], '002-002') === false) {?>
                                 <tr>
                                     <td><?= ++$contador ?></td>
                                     <td><?= $factura['documento'] ?></td>
