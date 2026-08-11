@@ -370,6 +370,28 @@ foreach ($facturas as $factura) {
         .modal-content table {
             width: 100%;
         }
+        /* Estados: actuales (verde pastel) y anteriores (rojo pastel) */
+        .status-actual,
+        .status-anterior {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .status-actual {
+            background: #e6ffea; /* verde pastel */
+            color: #000000; /* texto negro */
+            border: 1px solid #c9f3d0;
+        }
+
+        .status-anterior {
+            background: #ffecec; /* rojo pastel */
+            color: #000000; /* texto negro */
+            border: 1px solid #ffd6d6;
+        }
     </style>
 </head>
 
@@ -404,7 +426,8 @@ foreach ($facturas as $factura) {
                                 <?php
                                 $fechaFactura = new DateTime($factura['fecha']);
                                 $diasAbierta = (new DateTime())->diff($fechaFactura)->days;
-                                $statusClass = $diasAbierta >= 1 ? 'status-open-delayed' : 'status-open';
+                                // Para facturas actuales mostramos estado en verde pastel
+                                $statusClass = 'status-actual';
                                 ?>
                                 <td><span class="<?= $statusClass ?>">Abierta</span></td>
                                 <td class="acciones">
@@ -449,7 +472,8 @@ foreach ($facturas as $factura) {
                                 <?php
                                 $fechaFactura = new DateTime($factura['fecha']);
                                 $diasAbierta = (new DateTime())->diff($fechaFactura)->days;
-                                $statusClass = $diasAbierta >= 1 ? 'status-open-delayed' : 'status-open';
+                                // Para facturas en fechas anteriores mostramos estado en rojo pastel
+                                $statusClass = 'status-anterior';
                                 ?>
                                 <td><span class="<?= $statusClass ?>">Abierta</span></td>
                                 <td class="acciones">

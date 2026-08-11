@@ -145,11 +145,6 @@ $totalAnteriores = count($facturasAnteriores);
                 <a class="btn-card" href="reposiciones.php"><i class="fas fa-clock"></i> Revisar facturas</a>
             </article>
             <article class="dashboard-card">
-                <h2>Sincronización</h2>
-                <p>Ejecuta la sincronización de inventario y facturas con un solo clic.</p>
-                <a class="btn-card" href="sincronizar.php"><i class="fas fa-sync-alt"></i> Ir a sincronizar</a>
-            </article>
-            <article class="dashboard-card">
                 <h2>Facturas</h2>
                 <p>Consulta todas las facturas disponibles y trabaja con ellas desde aquí.</p>
                 <a class="btn-card" href="facturas.php"><i class="fas fa-file-invoice"></i> Ver facturas</a>
