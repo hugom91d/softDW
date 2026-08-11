@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../services/FacturaApi.php';
+
 class FacturaModel
 {
     private FacturaApi $api;
@@ -26,7 +28,7 @@ class FacturaModel
         $stmt = $conn->prepare(
             "SELECT id_factura, numero_factura, fecha, fecha_cierre, estado, id_responsable
             FROM factura
-            WHERE DATE(fecha) = CURDATE() AND estado = 0
+            WHERE estado = 0
             ORDER BY fecha ASC"
         );
 
@@ -59,8 +61,29 @@ class FacturaModel
         return is_array($detalles) ? $detalles : [];
     }
 
+    public function facturaTieneDetallesAbiertos(int $idFactura): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare("SELECT 1 FROM detalle_factura WHERE id_factura = ? AND estado = 0 LIMIT 1");
+        if (!$stmt) {
+            return true;
+        }
+
+        $stmt->bind_param('i', $idFactura);
+        $stmt->execute();
+        $stmt->store_result();
+        $hasOpen = $stmt->num_rows > 0;
+        $stmt->close();
+
+        return $hasOpen;
+    }
+
     public function cerrarFactura(int $idFactura): bool
     {
+        if ($this->facturaTieneDetallesAbiertos($idFactura)) {
+            return false;
+        }
+
         $conn = $this->getConnection();
         $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = NOW() WHERE id_factura = ? AND estado = 0");
         if (!$stmt) {
@@ -84,6 +107,38 @@ class FacturaModel
         }
 
         $stmt->bind_param('i', $idDetalle);
+        $success = $stmt->execute();
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $success && $affected > 0;
+    }
+
+    public function marcarDetalleComoNoRepuesto(int $idDetalle): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare("UPDATE detalle_factura SET estado = 2 WHERE id_detalle = ? AND estado = 0");
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('i', $idDetalle);
+        $success = $stmt->execute();
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $success && $affected > 0;
+    }
+
+    public function marcarDetalleComoNoRepuestoConObservacion(int $idDetalle, string $observacion = ''): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare("UPDATE detalle_factura SET estado = 2, observacion = ? WHERE id_detalle = ? AND estado = 0");
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('si', $observacion, $idDetalle);
         $success = $stmt->execute();
         $affected = $stmt->affected_rows;
         $stmt->close();
@@ -191,7 +246,6 @@ class FacturaModel
         $inserted = [];
 
         foreach ($facturas as $factura) {
-            // if (($factura['cliente']['nombre_comercial'] ?? '') === 'GPS BUSINESS S.A.S.') {
             if (strpos($factura['documento'] ?? '', '002-002') !== false) {
                 continue;
             }

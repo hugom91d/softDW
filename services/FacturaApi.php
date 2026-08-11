@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/HttpClient.php';
+
 class FacturaApi
 {
     private array $config;
@@ -7,7 +9,7 @@ class FacturaApi
 
     public function __construct()
     {
-        $apis = require '../config/api.php';
+        $apis = require __DIR__ . '/../config/api.php';
 
         $this->config = $apis['facturas'];
         $this->http = new HttpClient();

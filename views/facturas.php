@@ -56,8 +56,7 @@ if (!isset($_SESSION['cedula'])) {
                     <?php if (!empty($facturas)): ?>
                         <?php $contador = 0; ?>
                         <?php foreach ($facturas as $factura): ?>
-                            <?php //if ($factura['cliente']['nombre_comercial'] != 'GPS BUSINESS S.A.S.') { 
-                                if (strpos($factura['documento'], '002-002') === false) {?>
+                            <?php if (strpos($factura['documento'], '002-002') === false) { ?>
                                 <tr>
                                     <td><?= ++$contador ?></td>
                                     <td><?= $factura['documento'] ?></td>

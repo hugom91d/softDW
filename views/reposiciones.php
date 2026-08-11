@@ -23,8 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'cerrar' && isset($_POST['id_factura'])) {
         $idFactura = intval($_POST['id_factura']);
         $success = $model->cerrarFactura($idFactura);
+        $message = $success ? 'Factura cerrada correctamente.' : 'No se puede cerrar la factura porque hay detalles abiertos.';
         header('Content-Type: application/json');
-        echo json_encode(['success' => $success], JSON_PRETTY_PRINT);
+        echo json_encode(['success' => $success, 'message' => $message], JSON_PRETTY_PRINT);
         exit;
     }
 
@@ -35,9 +36,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         echo json_encode(['success' => $success], JSON_PRETTY_PRINT);
         exit;
     }
+
+    if ($_POST['action'] === 'no_repuesto' && isset($_POST['id_detalle'])) {
+        $idDetalle = intval($_POST['id_detalle']);
+        $observacion = trim((string)($_POST['observacion'] ?? ''));
+        if ($observacion !== '') {
+            $success = $model->marcarDetalleComoNoRepuestoConObservacion($idDetalle, $observacion);
+        } else {
+            $success = $model->marcarDetalleComoNoRepuesto($idDetalle);
+        }
+        header('Content-Type: application/json');
+        echo json_encode(['success' => $success], JSON_PRETTY_PRINT);
+        exit;
+    }
 }
 
 $facturas = $model->getFacturasAbiertasHoy();
+$facturasActuales = [];
+$facturasAnteriores = [];
+$hoy = (new DateTime())->format('Y-m-d');
+
+foreach ($facturas as $factura) {
+    $fechaFactura = (new DateTime($factura['fecha']))->format('Y-m-d');
+    if ($fechaFactura === $hoy) {
+        $facturasActuales[] = $factura;
+    } else {
+        $facturasAnteriores[] = $factura;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -52,38 +78,27 @@ $facturas = $model->getFacturasAbiertasHoy();
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
     <style>
-        .status-open {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 999px;
-            background: #fff3cd;
-            color: #856404;
-            font-weight: 600;
-        }
-        .acciones button {
-            margin-right: 0.5rem;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 1rem;
-            color: #333;
-        }
-        .acciones button:hover {
+        body {
             color: #000;
         }
+
         .btn-ver {
             color: #0d6efd;
         }
+
         .btn-cerrar {
             color: #198754;
         }
+
         table thead th,
         table tbody td {
             text-align: center;
         }
+
         table tbody td.acciones {
             text-align: left;
         }
+
         .acciones {
             display: flex;
             align-items: center;
@@ -91,6 +106,7 @@ $facturas = $model->getFacturasAbiertasHoy();
             gap: 0.5rem;
             white-space: nowrap;
         }
+
         .btn-ver,
         .btn-cerrar {
             width: 44px;
@@ -106,29 +122,74 @@ $facturas = $model->getFacturasAbiertasHoy();
             transition: background-color .2s ease, transform .2s ease;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
         }
+
         .btn-ver {
-            background-color: #a5c8e8 !important;
-            color: #0f2f4d;
-        }
-        .btn-ver:hover {
-            background-color: #000000 !important;
-        }
-        .btn-ver:hover i {
-            color: #ff4d4d !important;
-        }
-        .btn-cerrar {
-            background-color: #c7e5d2 !important;
+            background-color: #0d6efd !important;
+            /* azul primary más oscuro */
             color: #ffffff;
         }
+
+        .btn-ver:not(.disabled):hover {
+            background-color: #000000 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-ver:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
+        .btn-ver.disabled {
+            background-color: #e5e7eb !important;
+            color: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .btn-cerrar {
+            background-color: #198754 !important;
+            /* verde más visible */
+            color: #ffffff;
+        }
+
         .btn-cerrar i {
             color: #ffffff !important;
         }
-        .btn-cerrar:hover {
+
+        .btn-cerrar:not(.disabled):hover {
             background-color: #000000 !important;
+            transform: translateY(-1px);
         }
-        .btn-cerrar:hover i {
-            color: #ff4d4d !important;
+
+        .btn-cerrar:not(.disabled):hover i {
+            color: #ff3333 !important;
         }
+
+        .btn-cerrar.disabled {
+            background: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .status-closed {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            background: #d1e7dd;
+            color: #0f5132;
+            font-weight: 600;
+        }
+
+        .status-open-delayed {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            background: #f8d7da;
+            color: #842029;
+            font-weight: 600;
+            border: 1px solid #f5c2c7;
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -142,6 +203,7 @@ $facturas = $model->getFacturasAbiertasHoy();
             z-index: 9999;
             padding: 1rem;
         }
+
         .modal-content {
             width: 100%;
             max-width: 900px;
@@ -153,16 +215,19 @@ $facturas = $model->getFacturasAbiertasHoy();
             max-height: 90vh;
             overflow-y: auto;
         }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
+
         .modal-title {
             margin: 0;
             font-size: 1.25rem;
         }
+
         .btn-close-modal {
             width: 40px;
             height: 40px;
@@ -176,15 +241,25 @@ $facturas = $model->getFacturasAbiertasHoy();
             align-items: center;
             justify-content: center;
         }
-        .btn-close-modal:hover {
-            background: #b91c1c;
+
+        .btn-close-modal i {
+            color: inherit;
+            transition: color .12s ease, transform .08s ease;
         }
+
+        .btn-close-modal:hover {
+            background: #000000 !important;
+            color: #ff3333 !important;
+            transform: translateY(-1px);
+        }
+
         .modal-actions {
             margin-top: 1rem;
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
         }
+
         .modal-actions button {
             border: none;
             cursor: pointer;
@@ -193,14 +268,48 @@ $facturas = $model->getFacturasAbiertasHoy();
             font-weight: 600;
             color: #fff;
         }
+
         .btn-close-factura {
             background: #198754;
         }
+
         .btn-close-factura.disabled {
             background: #6c757d;
             cursor: not-allowed;
             opacity: 0.75;
         }
+
+        .btn-ok {
+            background: #0d6efd !important;
+            /* primary blue */
+            color: #ffffff !important;
+            /* texto blanco */
+            opacity: 1 !important;
+            font-weight: 800;
+            /* más gruesa */
+            border: none;
+            cursor: pointer;
+            transition: background-color .12s ease, transform .08s ease, color .08s ease;
+            width: 44px;
+            height: 36px;
+            padding: 0;
+            /* tamaño fijo */
+            font-size: 0.95rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.18);
+        }
+
+        .btn-ok:not(.disabled):hover {
+            background: #000000 !important;
+            /* negro al pasar */
+            color: #ff3333 !important;
+            /* icono/texto rojo */
+            transform: translateY(-1px);
+        }
+
         .btn-mark-detail,
         .btn-remove-detail {
             min-width: 44px;
@@ -216,31 +325,48 @@ $facturas = $model->getFacturasAbiertasHoy();
             transition: background-color .2s ease, transform .2s ease;
             width: auto !important;
         }
+
         .btn-mark-detail {
-            background: #22c55e;
+            background: #15803d;
+            /* verde más oscuro para que se vea activo */
         }
-        .btn-mark-detail:hover {
-            background: #16a34a;
+
+        .btn-mark-detail:not(.disabled):hover {
+            background: #000000 !important;
             transform: translateY(-1px);
         }
+
+        .btn-mark-detail:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
         .btn-mark-detail.disabled {
-            background: #6c757d;
+            background: #e5e7eb !important;
             cursor: not-allowed;
             opacity: 0.75;
+            pointer-events: none;
         }
+
         .btn-remove-detail {
             background: #ef4444;
         }
-        .btn-remove-detail:hover {
-            background: #dc2626;
+
+        .btn-remove-detail:not(.disabled):hover {
+            background: #000000 !important;
             transform: translateY(-1px);
         }
-        .btn-mark-detail.disabled + .btn-remove-detail,
+
+        .btn-remove-detail:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
+        .btn-mark-detail.disabled+.btn-remove-detail,
         .btn-remove-detail.disabled {
             background: #e5e7eb;
             cursor: not-allowed;
             opacity: 0.75;
         }
+
         .modal-content table {
             width: 100%;
         }
@@ -252,11 +378,12 @@ $facturas = $model->getFacturasAbiertasHoy();
     <div class="page">
         <header>
             <h1>Reposiciones</h1>
-            <p class="subtitle">Facturas abiertas de hoy. Solo se muestran facturas con estado abierto.</p>
+            <p class="subtitle">Facturas abiertas. Solo se muestran facturas con estado abierto.</p>
         </header>
 
         <section class="card table-container">
-            <table aria-label="Lista de reposiciones" id="reposicionesTable">
+            <h2>Actuales</h2>
+            <table aria-label="Reposiciones actuales" id="reposicionesActualesTable">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -266,15 +393,20 @@ $facturas = $model->getFacturasAbiertasHoy();
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="reposicionesBody">
-                    <?php if (!empty($facturas)): ?>
-                        <?php $contador = 0; ?>
-                        <?php foreach ($facturas as $factura): ?>
+                <tbody id="reposicionesActualesBody">
+                    <?php if (!empty($facturasActuales)): ?>
+                        <?php $contadorActuales = 0; ?>
+                        <?php foreach ($facturasActuales as $factura): ?>
                             <tr>
-                                <td><?= ++$contador ?></td>
+                                <td><?= ++$contadorActuales ?></td>
                                 <td><?= htmlspecialchars($factura['numero_factura']) ?></td>
                                 <td><?= htmlspecialchars($factura['fecha']) ?></td>
-                                <td><span class="status-open">Abierta</span></td>
+                                <?php
+                                $fechaFactura = new DateTime($factura['fecha']);
+                                $diasAbierta = (new DateTime())->diff($fechaFactura)->days;
+                                $statusClass = $diasAbierta >= 1 ? 'status-open-delayed' : 'status-open';
+                                ?>
+                                <td><span class="<?= $statusClass ?>">Abierta</span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
@@ -287,7 +419,52 @@ $facturas = $model->getFacturasAbiertasHoy();
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="empty-state">No hay facturas abiertas para hoy.</td>
+                            <td colspan="5" class="empty-state">No hay facturas abiertas actuales.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card table-container">
+            <h2>Fechas anteriores</h2>
+            <table aria-label="Reposiciones fechas anteriores" id="reposicionesAnterioresTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Número Factura</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="reposicionesAnterioresBody">
+                    <?php if (!empty($facturasAnteriores)): ?>
+                        <?php $contadorAnteriores = 0; ?>
+                        <?php foreach ($facturasAnteriores as $factura): ?>
+                            <tr>
+                                <td><?= ++$contadorAnteriores ?></td>
+                                <td><?= htmlspecialchars($factura['numero_factura']) ?></td>
+                                <td><?= htmlspecialchars($factura['fecha']) ?></td>
+                                <?php
+                                $fechaFactura = new DateTime($factura['fecha']);
+                                $diasAbierta = (new DateTime())->diff($fechaFactura)->days;
+                                $statusClass = $diasAbierta >= 1 ? 'status-open-delayed' : 'status-open';
+                                ?>
+                                <td><span class="<?= $statusClass ?>">Abierta</span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="<?= $factura['id_factura'] ?>" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="empty-state">No hay facturas abiertas en fechas anteriores.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -301,7 +478,7 @@ $facturas = $model->getFacturasAbiertasHoy();
                         <h2 class="modal-title">Detalle de la factura</h2>
                         <p id="modalFacturaId" style="margin: 0.25rem 0 0 0; color: #666;"></p>
                     </div>
-                    <button type="button" class="btn-close-modal" id="closeDetail" aria-label="Cerrar modal">×</button>
+                    <button type="button" class="btn-close-modal" id="closeDetail" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="table-container">
                     <table aria-label="Detalle de factura" id="detalleTable">
@@ -321,29 +498,114 @@ $facturas = $model->getFacturasAbiertasHoy();
             </div>
         </div>
     </div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const modalOverlay = document.getElementById('modalOverlay');
             const detalleBody = document.getElementById('detalleBody');
             const closeDetail = document.getElementById('closeDetail');
             const modalFacturaId = document.getElementById('modalFacturaId');
             let currentFacturaId = null;
+            let currentNoRepuestoId = null;
+            let currentNoRepuestoButton = null;
+
+            function removeExistingNoRepuestoForm() {
+                const existing = detalleBody.querySelector('.no-repuesto-row');
+                if (existing) existing.remove();
+                currentNoRepuestoId = null;
+                currentNoRepuestoButton = null;
+            }
 
             function openModal(id) {
+                removeExistingNoRepuestoForm();
                 modalOverlay.style.display = 'flex';
                 currentFacturaId = id;
                 modalFacturaId.textContent = `Factura ID: ${id}`;
             }
 
+            function openNoRepuestoForm(idDetalle, buttonElement) {
+                removeExistingNoRepuestoForm();
+                currentNoRepuestoId = idDetalle;
+                currentNoRepuestoButton = buttonElement;
+
+                const row = buttonElement.closest('tr');
+                if (!row) return;
+
+                const formRow = document.createElement('tr');
+                formRow.className = 'no-repuesto-row';
+                const td = document.createElement('td');
+                td.colSpan = 6;
+                td.innerHTML = `
+                    <div class="no-repuesto-form" style="margin-top:0.75rem; border:1px solid #f5c2c7; background:#fff1f2; border-radius:0.75rem; padding:0.75rem; display:flex; align-items:center; gap:0.75rem;">
+                        <label style="font-weight:700; color:#842029; margin:0; white-space:nowrap;">Observación</label>
+                        <input type="text" id="noRepuestoInput" placeholder="Escribe la razón aquí..." style="flex:1; padding:0.6rem 0.85rem; border-radius:0.5rem; border:1px solid #ced4da; font-family:inherit;" />
+                        <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
+                    </div>
+                `;
+
+                formRow.appendChild(td);
+                row.parentNode.insertBefore(formRow, row.nextSibling);
+
+                const input = document.getElementById('noRepuestoInput');
+                input.focus();
+
+                document.getElementById('saveNoRepuestoButton').addEventListener('click', function() {
+                    const observacion = input.value.trim();
+                    if (observacion.length === 0) {
+                        alert('Escribe una observación antes de continuar.');
+                        input.focus();
+                        return;
+                    }
+
+                    const idDetalle = currentNoRepuestoId;
+                    const buttonEl = currentNoRepuestoButton;
+                    if (!idDetalle || !buttonEl) {
+                        removeExistingNoRepuestoForm();
+                        return;
+                    }
+
+                    fetch('reposiciones.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `action=no_repuesto&id_detalle=${encodeURIComponent(idDetalle)}&observacion=${encodeURIComponent(observacion)}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const rowEl = buttonEl.closest('tr');
+                                if (rowEl) {
+                                    rowEl.querySelector('td:nth-child(5)').textContent = 'No repuesto';
+                                    const markButton = rowEl.querySelector('.btn-mark-detail');
+                                    if (markButton) {
+                                        markButton.disabled = true;
+                                        markButton.classList.add('disabled');
+                                    }
+                                    buttonEl.disabled = true;
+                                    buttonEl.classList.add('disabled');
+                                }
+                                removeExistingNoRepuestoForm();
+                            } else {
+                                alert('No se pudo guardar la observación.');
+                            }
+                        })
+                        .catch(() => {
+                            alert('Error al guardar la observación.');
+                        });
+                });
+            }
+
             function closeModal() {
+                removeExistingNoRepuestoForm();
                 modalOverlay.style.display = 'none';
                 detalleBody.innerHTML = '';
                 currentFacturaId = null;
             }
 
             document.querySelectorAll('.btn-ver').forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const idFactura = this.dataset.id;
                     if (!idFactura) {
                         return;
@@ -353,26 +615,26 @@ $facturas = $model->getFacturasAbiertasHoy();
                         .then(response => response.json())
                         .then(data => {
                             const detalles = Array.isArray(data.detalles) ? data.detalles : [];
-                            detalleBody.innerHTML = detalles.length > 0
-                                ? detalles.map((detalle, index) => `
+                            detalleBody.innerHTML = detalles.length > 0 ?
+                                detalles.map((detalle, index) => `
                                     <tr>
                                         <td>${index + 1}</td>
                                         <td>${detalle.codigo_prenda ?? '-'}</td>
                                         <td>${detalle.cantidad ?? '-'}</td>
                                         <td>${detalle.descripcion ?? '-'}</td>
-                                        <td>${detalle.estado == 0 ? 'Abierto' : 'Repuesto'}</td>
+                                        <td>${detalle.estado == 0 ? 'Abierto' : (detalle.estado == 1 ? 'Repuesto' : 'No repuesto')}</td>
                                         <td>
                                             <div class="detalle-actions" style="display:inline-flex; gap:0.5rem; align-items:center;">
                                                 <button type="button" class="btn-mark-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como repuesto">
                                                     <i class="fa-solid fa-check"></i>
                                                 </button>
-                                                <button type="button" class="btn-remove-detail" title="Eliminar detalle">
+                                                <button type="button" class="btn-remove-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como no repuesto">
                                                     <i class="fa-solid fa-xmark"></i>
                                                 </button>
                                             </div>
                                         </td>
-                                    </tr>`).join('')
-                                : '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
+                                    </tr>`).join('') :
+                                '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
 
                             bindMarkDetailButtons();
                             openModal(idFactura);
@@ -384,9 +646,55 @@ $facturas = $model->getFacturasAbiertasHoy();
                 });
             });
 
+            bindCloseFacturaButtons();
+
+            function bindCloseFacturaButtons() {
+                document.querySelectorAll('.btn-cerrar').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const idFactura = this.dataset.id;
+                        if (!idFactura || this.disabled) {
+                            return;
+                        }
+
+                        const buttonElement = this;
+                        fetch('reposiciones.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `action=cerrar&id_factura=${encodeURIComponent(idFactura)}`
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const row = buttonElement.closest('tr');
+                                    if (row) {
+                                        const estadoCell = row.querySelector('td:nth-child(4)');
+                                        if (estadoCell) {
+                                            estadoCell.innerHTML = '<span class="status-closed">Cerrada</span>';
+                                        }
+                                        const viewButton = row.querySelector('.btn-ver');
+                                        [buttonElement, viewButton].forEach(el => {
+                                            if (el) {
+                                                el.disabled = true;
+                                                el.classList.add('disabled');
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    alert(data.message || 'No se puede cerrar la factura porque hay detalles abiertos.');
+                                }
+                            })
+                            .catch(() => {
+                                alert('Error al cerrar la factura.');
+                            });
+                    });
+                });
+            }
+
             function bindMarkDetailButtons() {
                 document.querySelectorAll('.btn-mark-detail').forEach(button => {
-                    button.addEventListener('click', function () {
+                    button.addEventListener('click', function() {
                         const idDetalle = this.dataset.detalleId;
                         if (!idDetalle || this.disabled) {
                             return;
@@ -394,12 +702,12 @@ $facturas = $model->getFacturasAbiertasHoy();
                         const buttonElement = this;
 
                         fetch('reposiciones.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: `action=repuesto&id_detalle=${encodeURIComponent(idDetalle)}`
-                        })
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `action=repuesto&id_detalle=${encodeURIComponent(idDetalle)}`
+                            })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
@@ -408,6 +716,11 @@ $facturas = $model->getFacturasAbiertasHoy();
                                     const row = buttonElement.closest('tr');
                                     if (row) {
                                         row.querySelector('td:nth-child(5)').textContent = 'Repuesto';
+                                        const removeButton = row.querySelector('.btn-remove-detail');
+                                        if (removeButton) {
+                                            removeButton.disabled = true;
+                                            removeButton.classList.add('disabled');
+                                        }
                                     }
                                 } else {
                                     alert('No se pudo marcar el detalle como repuesto.');
@@ -418,10 +731,20 @@ $facturas = $model->getFacturasAbiertasHoy();
                             });
                     });
                 });
+
+                document.querySelectorAll('.btn-remove-detail').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const idDetalle = this.dataset.detalleId;
+                        if (!idDetalle || this.disabled) {
+                            return;
+                        }
+                        openNoRepuestoForm(idDetalle, this);
+                    });
+                });
             }
 
             closeDetail.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', function (event) {
+            modalOverlay.addEventListener('click', function(event) {
                 if (event.target === modalOverlay) {
                     closeModal();
                 }
