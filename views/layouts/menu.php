@@ -32,7 +32,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <div class="sidebar" id="sidebar">
     <ul>
         <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-        <li><a href="../views/sincronizar.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
+        <li><a href="../views/botones.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
         <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
         <li><a href="inventario.php"><i class="fas fa-boxes-stacked"></i><span>Inventario</span></a></li>
         <li><a href="../views/reposiciones.php"><i class="fas fa-rotate"></i><span>Reposiciones</span></a></li>
