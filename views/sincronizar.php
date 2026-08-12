@@ -34,7 +34,28 @@ $fechaHoy = date('d/m/Y');
             <p class="subtitle">La aplicación está sincronizando datos. Por favor, espere.</p>
         </header>
 
-        <section class="card sync-card">
+        <section class="card">
+            <div class="sync-actions">
+                <div class="sync-quick-actions">
+                    <button class="action-button" id="btnFacturas" title="Sincronizar Facturas">
+                        <div class="action-icon"><i class="fa-solid fa-file-invoice fa-2x"></i></div>
+                        <div class="action-label">Facturas</div>
+                    </button>
+
+                    <button class="action-button" id="btnProductos" title="Productos">
+                        <div class="action-icon"><i class="fa-solid fa-box-open fa-2x"></i></div>
+                        <div class="action-label">Productos</div>
+                    </button>
+
+                    <button class="action-button" id="btnStock" title="Stock Productos">
+                        <div class="action-icon"><i class="fa-solid fa-layer-group fa-2x"></i></div>
+                        <div class="action-label">Stock Productos</div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card sync-card" id="syncCard" style="display:none;">
             <h2>Sincronización en curso</h2>
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
@@ -63,6 +84,87 @@ $fechaHoy = date('d/m/Y');
     </div>
 
     <script src="../public/js/menu.js"></script>
+    <style>
+        .sync-quick-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: stretch;
+            padding: 1rem 0;
+        }
+
+        .action-button {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            border: 1px solid #e6e6e6;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+
+        .action-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #f3f4f6;
+        }
+
+        .action-label {
+            font-weight: 700;
+            color: #0f172a;
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnFacturas = document.getElementById('btnFacturas');
+            const syncCard = document.getElementById('syncCard');
+            const syncStatus = document.getElementById('syncStatus');
+            const progressFill = document.getElementById('progressFill');
+
+            function revealSync() {
+                if (syncCard) {
+                    syncCard.style.display = 'block';
+                    syncCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            btnFacturas && btnFacturas.addEventListener('click', function() {
+                // mostrar panel de sincronización y simular inicio
+                revealSync();
+                if (syncStatus) syncStatus.textContent = 'Iniciando sincronización de facturas...';
+                if (progressFill) {
+                    progressFill.style.width = '30%';
+                    setTimeout(() => { progressFill.style.width = '70%'; }, 700);
+                    setTimeout(() => { progressFill.style.width = '100%'; if (syncStatus) syncStatus.textContent = 'Sincronización completada (simulada).'; }, 1600);
+                }
+            });
+
+            // Placeholders for other buttons
+            document.getElementById('btnProductos')?.addEventListener('click', function() {
+                alert('Función Productos: pendiente de desarrollo.');
+            });
+            document.getElementById('btnStock')?.addEventListener('click', function() {
+                alert('Función Stock Productos: pendiente de desarrollo.');
+            });
+        });
+    </script>
 </body>
 
 </html>
