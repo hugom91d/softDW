@@ -21,7 +21,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <div class="dropdown-user" style="color: #222;">
                 <?= htmlspecialchars($_SESSION['nombre'] ?? 'Usuario') ?>
             </div>
-            <a href="#">
+            <a href="../views/perfil.php">
                 <i class="fa-solid fa-id-badge"></i>
                 <span>Mi Perfil</span>
             </a>
