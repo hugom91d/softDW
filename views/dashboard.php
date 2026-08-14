@@ -146,6 +146,10 @@ $totalAnteriores = count($facturasAnteriores);
                 min-width: 0;
             }
 
+            .dashboard-invoices {
+                display: none;
+            }
+
             .dashboard-table {
                 display: block;
                 overflow-x: auto;
@@ -195,7 +199,7 @@ $totalAnteriores = count($facturasAnteriores);
             </article>
         </section>
 
-        <section class="dashboard-section">
+        <section class="dashboard-section dashboard-invoices">
             <h2>Últimas facturas abiertas</h2>
             <table class="dashboard-table">
                 <thead>

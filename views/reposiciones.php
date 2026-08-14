@@ -213,7 +213,9 @@ foreach ($facturas as $factura) {
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             position: relative;
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-header {
@@ -221,6 +223,10 @@ foreach ($facturas as $factura) {
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            flex: 0 0 auto;
+            background: #fff;
+            position: relative;
+            z-index: 1;
         }
 
         .modal-title {
@@ -370,6 +376,13 @@ foreach ($facturas as $factura) {
         .modal-content table {
             width: 100%;
         }
+
+        .modal-content > .table-container {
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
         /* Estados: actuales (verde pastel) y anteriores (rojo pastel) */
         .status-actual,
         .status-anterior {
@@ -510,6 +523,114 @@ foreach ($facturas as $factura) {
 
             .detalle-actions {
                 gap: 0.35rem !important;
+            }
+
+            #detalleTable,
+            #detalleTable tbody,
+            #detalleTable tr,
+            #detalleTable td {
+                display: block;
+                width: 100%;
+                min-width: 0;
+            }
+
+            #detalleTable {
+                min-width: 0;
+            }
+
+            #detalleTable thead {
+                display: none;
+            }
+
+            #detalleTable tbody tr {
+                margin-bottom: 0.75rem;
+                padding: 0.8rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.75rem;
+                background: #fff;
+            }
+
+            #detalleTable tbody td {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 0.75rem;
+                padding: 0.55rem 0;
+                text-align: right;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            #detalleTable tbody td::before {
+                flex: 0 0 auto;
+                color: #475569;
+                font-size: 0.76rem;
+                font-weight: 700;
+                text-align: left;
+                text-transform: uppercase;
+            }
+
+            #detalleTable tbody td:nth-child(1) {
+                display: none;
+            }
+
+            #detalleTable tbody td:nth-child(2)::before {
+                content: 'Prenda';
+            }
+
+            #detalleTable tbody td:nth-child(3)::before {
+                content: 'Cantidad';
+            }
+
+            #detalleTable tbody td:nth-child(4)::before {
+                content: 'Descripción';
+            }
+
+            #detalleTable tbody td:nth-child(5)::before {
+                content: 'Estado';
+            }
+
+            #detalleTable tbody td:nth-child(6) {
+                align-items: center;
+                padding-top: 0.75rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            #detalleTable tbody td:nth-child(6)::before {
+                content: 'Acciones';
+            }
+
+            #detalleTable .detalle-actions {
+                display: inline-flex !important;
+                justify-content: flex-end;
+                gap: 0.35rem !important;
+                flex: 1;
+            }
+
+            #detalleTable .btn-mark-detail,
+            #detalleTable .btn-remove-detail {
+                width: 34px;
+                min-width: 34px;
+                height: 34px;
+                margin: 0;
+            }
+
+            #detalleTable .no-repuesto-row,
+            #detalleTable .no-repuesto-row td {
+                display: block !important;
+            }
+
+            #detalleTable .no-repuesto-form {
+                display: flex !important;
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
+            }
+
+            #detalleTable .no-repuesto-form input,
+            #detalleTable .no-repuesto-form .btn-ok {
+                width: 100%;
+                margin-top: 0;
             }
         }
     </style>
@@ -763,11 +884,11 @@ foreach ($facturas as $factura) {
                                 detalles.map((detalle, index) => `
                                     <tr>
                                         <td>${index + 1}</td>
-                                        <td>${detalle.codigo_interno ?? '-'}</td>
-                                        <td>${detalle.cantidad ?? '-'}</td>
-                                        <td>${detalle.descripcion ?? '-'}</td>
+                                        <td data-label="Prenda">${detalle.codigo_interno ?? '-'}</td>
+                                        <td data-label="Cantidad">${detalle.cantidad ?? '-'}</td>
+                                        <td data-label="Descripción">${detalle.descripcion ?? '-'}</td>
                                         <td>${detalle.estado == 0 ? 'Abierto' : (detalle.estado == 1 ? 'Repuesto' : 'No repuesto')}</td>
-                                        <td>
+                                        <td data-label="Acciones">
                                             <div class="detalle-actions" style="display:inline-flex; gap:0.5rem; align-items:center;">
                                                 <button type="button" class="btn-mark-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como repuesto">
                                                     <i class="fa-solid fa-check"></i>

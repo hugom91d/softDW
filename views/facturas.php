@@ -17,6 +17,70 @@ if (!isset($_SESSION['cedula'])) {
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
+    <style>
+        @media (max-width: 768px) {
+            #facturasTable {
+                min-width: 0;
+                table-layout: fixed;
+            }
+
+            #facturasTable th:nth-child(1),
+            #facturasTable td:nth-child(1),
+            #facturasTable th:nth-child(4),
+            #facturasTable td:nth-child(4) {
+                display: none;
+            }
+
+            #facturasTable th:nth-child(2),
+            #facturasTable td:nth-child(2) {
+                width: 37%;
+            }
+
+            #facturasTable th:nth-child(3),
+            #facturasTable td:nth-child(3) {
+                width: 48%;
+            }
+
+            #facturasTable th:nth-child(5),
+            #facturasTable td:nth-child(5) {
+                width: 15%;
+            }
+
+            #facturasTable td:nth-child(2) {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                line-height: 1.25;
+            }
+
+            #facturasTable .invoice-number {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                overflow: hidden;
+            }
+
+            #facturasTable td:nth-child(3) {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                line-height: 1.25;
+            }
+
+            #facturasTable .acciones {
+                text-align: right;
+                white-space: nowrap;
+            }
+
+            #facturasTable .btn-pdf {
+                width: 32px;
+                height: 32px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -59,7 +123,7 @@ if (!isset($_SESSION['cedula'])) {
                             <?php if (strpos($factura['documento'], '002-002') === false) { ?>
                                 <tr>
                                     <td><?= ++$contador ?></td>
-                                    <td><?= $factura['documento'] ?></td>
+                                    <td><span class="invoice-number"><?= htmlspecialchars($factura['documento'] ?? '-') ?></span></td>
                                     <td><?= $factura['cliente']['nombre_comercial'] ?></td>
                                     <td><?= $factura['total'] ?></td>
                                     <td class="acciones">
