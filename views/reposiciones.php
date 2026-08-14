@@ -689,6 +689,7 @@ foreach ($facturas as $factura) {
             }
 
             #detalleTable .no-repuesto-form input,
+            #detalleTable .no-repuesto-form select,
             #detalleTable .no-repuesto-form .btn-ok {
                 width: 100%;
                 margin-top: 0;
@@ -893,7 +894,11 @@ foreach ($facturas as $factura) {
                 td.innerHTML = `
                     <div class="no-repuesto-form" style="margin-top:0.75rem; border:1px solid #f5c2c7; background:#fff1f2; border-radius:0.75rem; padding:0.75rem; display:flex; align-items:center; gap:0.75rem;">
                         <label style="font-weight:700; color:#842029; margin:0; white-space:nowrap;">Observación</label>
-                        <input type="text" id="noRepuestoInput" placeholder="Escribe la razón aquí..." style="flex:1; padding:0.6rem 0.85rem; border-radius:0.5rem; border:1px solid #ced4da; font-family:inherit;" />
+                        <select id="noRepuestoInput" required style="flex:1; padding:0.6rem 0.85rem; border-radius:0.5rem; border:1px solid #ced4da; font-family:inherit;">
+                            <option value="">Selecciona una opción</option>
+                            <option value="No hay stock en GPS">No hay stock en GPS</option>
+                            <option value="No hay stock en Quito">No hay stock en Quito</option>
+                        </select>
                         <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
                     </div>
                 `;
