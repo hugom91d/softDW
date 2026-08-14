@@ -5,6 +5,9 @@ if (session_status() === PHP_SESSION_NONE) {
 ?>
 
 <header class="topbar">
+    <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+    </button>
     <div class="logo">
         <img src="../public/img/logo.png" alt="Logo">
     </div>

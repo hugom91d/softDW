@@ -392,6 +392,126 @@ foreach ($facturas as $factura) {
             color: #000000; /* texto negro */
             border: 1px solid #ffd6d6;
         }
+
+        .status-short {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #reposicionesActualesTable,
+            #reposicionesAnterioresTable {
+                min-width: 0;
+                table-layout: fixed;
+            }
+
+            .card.table-container:has(#reposicionesActualesTable),
+            .card.table-container:has(#reposicionesAnterioresTable) {
+                overflow-x: hidden;
+            }
+
+            #reposicionesActualesTable th:nth-child(1),
+            #reposicionesActualesTable td:nth-child(1),
+            #reposicionesActualesTable th:nth-child(3),
+            #reposicionesActualesTable td:nth-child(3),
+            #reposicionesAnterioresTable th:nth-child(1),
+            #reposicionesAnterioresTable td:nth-child(1),
+            #reposicionesAnterioresTable th:nth-child(3),
+            #reposicionesAnterioresTable td:nth-child(3) {
+                display: none;
+            }
+
+            #reposicionesActualesTable th:nth-child(2),
+            #reposicionesActualesTable td:nth-child(2),
+            #reposicionesAnterioresTable th:nth-child(2),
+            #reposicionesAnterioresTable td:nth-child(2) {
+                width: 54%;
+                max-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            #reposicionesActualesTable th:nth-child(4),
+            #reposicionesActualesTable td:nth-child(4),
+            #reposicionesAnterioresTable th:nth-child(4),
+            #reposicionesAnterioresTable td:nth-child(4) {
+                display: none;
+            }
+
+            #reposicionesActualesTable th:nth-child(5),
+            #reposicionesActualesTable td:nth-child(5),
+            #reposicionesAnterioresTable th:nth-child(5),
+            #reposicionesAnterioresTable td:nth-child(5) {
+                white-space: nowrap;
+            }
+
+            #reposicionesActualesTable .acciones,
+            #reposicionesAnterioresTable .acciones {
+                width: 100%;
+                gap: 0.25rem;
+                justify-content: flex-end;
+            }
+
+            #reposicionesActualesTable .status-full,
+            #reposicionesAnterioresTable .status-full {
+                display: none;
+            }
+
+            #reposicionesActualesTable .status-short,
+            #reposicionesAnterioresTable .status-short {
+                display: inline;
+            }
+
+            #reposicionesActualesTable .btn-ver,
+            #reposicionesActualesTable .btn-cerrar,
+            #reposicionesAnterioresTable .btn-ver,
+            #reposicionesAnterioresTable .btn-cerrar {
+                width: 32px;
+                min-width: 32px;
+                height: 32px;
+                border-radius: 7px;
+                font-size: 0.8rem;
+            }
+
+            #reposicionesActualesTable .status-actual,
+            #reposicionesAnterioresTable .status-anterior {
+                min-width: 24px;
+                padding: 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .modal-overlay {
+                padding: 0.5rem;
+                align-items: flex-end;
+            }
+
+            .modal-content {
+                max-height: 92vh;
+                padding: 1rem;
+                border-radius: 1rem 1rem 0 0;
+            }
+
+            .modal-header {
+                align-items: flex-start;
+            }
+
+            .modal-title {
+                font-size: 1.05rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions button {
+                width: 100%;
+                margin-top: 0;
+            }
+
+            .detalle-actions {
+                gap: 0.35rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -429,7 +549,7 @@ foreach ($facturas as $factura) {
                                 // Para facturas actuales mostramos estado en verde pastel
                                 $statusClass = 'status-actual';
                                 ?>
-                                <td><span class="<?= $statusClass ?>">Abierta</span></td>
+                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
@@ -475,7 +595,7 @@ foreach ($facturas as $factura) {
                                 // Para facturas en fechas anteriores mostramos estado en rojo pastel
                                 $statusClass = 'status-anterior';
                                 ?>
-                                <td><span class="<?= $statusClass ?>">Abierta</span></td>
+                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
@@ -643,7 +763,7 @@ foreach ($facturas as $factura) {
                                 detalles.map((detalle, index) => `
                                     <tr>
                                         <td>${index + 1}</td>
-                                        <td>${detalle.codigo_prenda ?? '-'}</td>
+                                        <td>${detalle.codigo_interno ?? '-'}</td>
                                         <td>${detalle.cantidad ?? '-'}</td>
                                         <td>${detalle.descripcion ?? '-'}</td>
                                         <td>${detalle.estado == 0 ? 'Abierto' : (detalle.estado == 1 ? 'Repuesto' : 'No repuesto')}</td>

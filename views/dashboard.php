@@ -122,6 +122,50 @@ $totalAnteriores = count($facturasAnteriores);
             font-weight: 700;
             color: #0f172a;
         }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-card {
+                min-height: 0;
+                padding: 1.15rem;
+            }
+
+            .dashboard-card h2 {
+                font-size: 2rem;
+            }
+
+            .dashboard-card .btn-card {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .dashboard-section {
+                min-width: 0;
+            }
+
+            .dashboard-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .dashboard-table thead,
+            .dashboard-table tbody {
+                display: table;
+                width: 100%;
+                min-width: 460px;
+                table-layout: fixed;
+            }
+
+            .dashboard-table th,
+            .dashboard-table td {
+                padding: .75rem .6rem;
+                font-size: .85rem;
+            }
+        }
     </style>
 </head>
 

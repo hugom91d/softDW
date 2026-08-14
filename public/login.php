@@ -15,6 +15,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            box-sizing: border-box;
+            padding: 16px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
         }
 
         .card {
@@ -24,6 +32,13 @@
             border-radius: 18px;
             box-shadow: 0 10px 30px rgba(18, 38, 63, 0.08);
             padding: 32px;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 24px 18px;
+                border-radius: 14px;
+            }
         }
 
         h2 {

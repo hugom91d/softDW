@@ -8,6 +8,7 @@
     margin-top: var(--top-menu-height);
     margin-left: var(--sidebar-width);
     padding: 24px;
+    width: calc(100% - var(--sidebar-width));
     min-height: calc(100vh - var(--top-menu-height));
     transition: margin-left .3s ease;
     box-sizing: border-box;
@@ -15,4 +16,18 @@
 
 body.sidebar-collapsed .page {
     margin-left: var(--sidebar-collapsed);
+    width: calc(100% - var(--sidebar-collapsed));
+}
+
+@media (max-width: 768px) {
+    :root {
+        --top-menu-height: 58px;
+    }
+
+    .page,
+    body.sidebar-collapsed .page {
+        width: 100%;
+        margin-left: 0;
+        padding: 18px 14px 24px;
+    }
 }

@@ -1,6 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
     const userButton = document.getElementById("userButton");
     const dropdownMenu = document.getElementById("dropdownMenu");
+    const mobileMenuButton = document.getElementById("mobileMenuButton");
+    const sidebar = document.getElementById("sidebar");
+
+    if (mobileMenuButton && sidebar) {
+        mobileMenuButton.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const isOpen = sidebar.classList.toggle("mobile-open");
+            mobileMenuButton.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        document.addEventListener("click", function (e) {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && e.target !== mobileMenuButton) {
+                sidebar.classList.remove("mobile-open");
+                mobileMenuButton.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
 
     if (!userButton || !dropdownMenu) {
         return;
@@ -122,6 +139,11 @@ function toggleMenu() {
         return;
     }
 
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-open');
+        return;
+    }
+
     sidebar.classList.toggle('collapsed');
     document.body.classList.toggle('sidebar-collapsed');
 
@@ -138,7 +160,7 @@ function toggleMenu() {
 
         const sWidth = getComputedStyle(sidebar).width;
 
-        if (page) {
+        if (page && window.innerWidth > 768) {
             page.style.marginLeft = sWidth;
             page.style.width = `calc(100vw - ${sWidth})`;
         }
@@ -148,14 +170,26 @@ function toggleMenu() {
     icon.className = sidebar.classList.contains('collapsed') ? 'fas fa-angle-right' : 'fas fa-angle-left';
 }
 
-// Initialize page offsets on load (in case sidebar default state is collapsed or wide)
-document.addEventListener('DOMContentLoaded', function () {
+function adjustPageLayout() {
     const sidebar = document.getElementById('sidebar');
     const page = document.querySelector('.page');
-    if (!sidebar || !page) return;
+    if (!sidebar || !page) {
+        return;
+    }
+
+    if (window.innerWidth <= 768) {
+        page.style.marginLeft = '';
+        page.style.width = '';
+        return;
+    }
+
     const sWidth = getComputedStyle(sidebar).width;
     page.style.marginLeft = sWidth;
     page.style.width = `calc(100vw - ${sWidth})`;
-});
+}
+
+// Keep the content aligned when the device changes orientation or the window is resized.
+document.addEventListener('DOMContentLoaded', adjustPageLayout);
+window.addEventListener('resize', adjustPageLayout);
 
 

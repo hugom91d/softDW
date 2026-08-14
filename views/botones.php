@@ -58,6 +58,7 @@ if (!isset($_SESSION['cedula'])) {
             gap: 1rem;
             justify-content: flex-start;
             align-items: stretch;
+            flex-wrap: wrap;
             padding: 1rem 0;
         }
 
@@ -79,7 +80,7 @@ if (!isset($_SESSION['cedula'])) {
 
         .action-button:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);    
         }
 
         .action-icon {
@@ -97,9 +98,37 @@ if (!isset($_SESSION['cedula'])) {
             color: #0f172a;
             text-align: center;
         }
+
+        @media (max-width: 768px) {
+            .sync-quick-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.75rem;
+            }
+
+            .action-button {
+                width: 100%;
+                height: 130px;
+            }
+
+            .action-icon {
+                width: 52px;
+                height: 52px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .sync-quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .action-button {
+                height: 112px;
+            }
+        }
     </style>
 
-    <script>
+    <script>    
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('btnFacturas')?.addEventListener('click', function() {
                 window.location.href = '../views/sincronizar.php';

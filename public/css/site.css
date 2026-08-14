@@ -13,6 +13,18 @@
     z-index: 1100;
 }
 
+.mobile-menu-button {
+    display: none;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+}
+
 .logo {
     color: #ffffff;
     font-size: 20px;
@@ -144,7 +156,14 @@ body {
     margin: 0;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f5f7;
-    color: #222
+    color: #222;
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
 }
 
 .page {
@@ -171,6 +190,7 @@ h1 {
     box-shadow: 0 10px 30px rgba(18, 38, 63, 0.08);
     padding: 24px;
     margin-bottom: 24px;
+    min-width: 0;
 }
 
 /* .filters {
@@ -280,11 +300,13 @@ button:hover {
 
 .table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 560px;
 }
 
 th,
@@ -376,4 +398,69 @@ tr:hover {
 .btn-finalizar i {
     color: #ffffff;
     font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        height: 58px;
+        padding: 0 14px;
+    }
+
+    .mobile-menu-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .topbar .logo img {
+        max-width: 105px;
+    }
+
+    .page {
+        margin-top: 58px;
+    }
+
+    header {
+        margin-bottom: 18px;
+    }
+
+    h1 {
+        font-size: 1.55rem;
+    }
+
+    .subtitle {
+        font-size: .9rem;
+        line-height: 1.45;
+    }
+
+    .card {
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    th,
+    td {
+        padding: 11px 12px;
+        white-space: nowrap;
+    }
+
+    th {
+        font-size: .75rem;
+    }
+
+    .dropdown-menu {
+        position: fixed;
+        top: 54px;
+        right: 10px;
+        width: min(220px, calc(100vw - 20px));
+    }
+
+    .sync-overlay {
+        padding: 14px;
+    }
+
+    .sync-card {
+        width: 100%;
+    }
 }

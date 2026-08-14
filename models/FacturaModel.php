@@ -47,7 +47,7 @@ class FacturaModel
     public function getDetalleFactura(int $idFactura): array
     {
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("SELECT id_detalle, cantidad, codigo_prenda, descripcion, estado FROM detalle_factura WHERE id_factura = ?");
+        $stmt = $conn->prepare("SELECT id_detalle, cantidad, codigo_prenda, codigo_interno, descripcion, estado FROM detalle_factura WHERE id_factura = ?");
         if (!$stmt) {
             return [];
         }
@@ -206,6 +206,27 @@ class FacturaModel
         return $insertId;
     }
 
+    private function obtenerCodigoInternoProducto(string $codigoPrenda): ?string
+    {
+        if ($codigoPrenda === '') {
+            return null;
+        }
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare("SELECT codigo FROM productos WHERE codigo_interno = ? LIMIT 1");
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('s', $codigoPrenda);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        return $row['codigo'] ?? null;
+    }
+
     private function insertarDetalleFacturaLocal(int $idFactura, array $detalle): bool
     {
         $productoNombre = $detalle['producto_nombre'] ?? '';
@@ -218,15 +239,16 @@ class FacturaModel
 
         $cantidad = isset($detalle['cantidad']) ? (int) $detalle['cantidad'] : 0;
         $codigoPrenda = $detalle['producto_id'] ?? '';
+        $codigoInterno = $this->obtenerCodigoInternoProducto((string) $codigoPrenda);
         $descripcion = $productoNombre ?: $productoDescripcion;
         $estado = 0;
 
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("INSERT INTO detalle_factura (id_factura, cantidad, codigo_prenda, descripcion, estado) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO detalle_factura (id_factura, cantidad, codigo_prenda, codigo_interno, descripcion, estado) VALUES (?, ?, ?, ?, ?, ?)");
         if (!$stmt) {
             return false;
         }
-        $stmt->bind_param('iissi', $idFactura, $cantidad, $codigoPrenda, $descripcion, $estado);
+        $stmt->bind_param('iisssi', $idFactura, $cantidad, $codigoPrenda, $codigoInterno, $descripcion, $estado);
         $success = $stmt->execute();
         $stmt->close();
 
