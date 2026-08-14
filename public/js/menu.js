@@ -37,17 +37,19 @@ function initSyncOverlay() {
     const progressFill = document.getElementById('progressFill');
     const syncStatus = document.getElementById('syncStatus');
     const syncBlocker = document.getElementById('syncBlocker');
+    const syncCard = document.getElementById('syncCard');
     const resultsCard = document.getElementById('resultsCard');
     const resultsSummary = document.getElementById('resultsSummary');
     const resultsBody = document.getElementById('resultsBody');
     const noResultsMessage = document.getElementById('noResultsMessage');
     const fechaHoy = document.querySelector('meta[name="sync-date"]')?.content || '';
 
-    if (!progressFill || !syncStatus || !syncBlocker || !resultsCard || !resultsSummary || !resultsBody || !noResultsMessage) {
+    if (!progressFill || !syncStatus || !syncBlocker || !syncCard || !resultsCard || !resultsSummary || !resultsBody || !noResultsMessage) {
         return;
     }
 
     syncBlocker.style.display = 'block';
+    syncCard.style.display = 'flex';
     resultsCard.style.display = 'none';
     noResultsMessage.style.display = 'none';
 
@@ -55,13 +57,17 @@ function initSyncOverlay() {
     let apiResult = null;
     let progress = 0;
     let lastTimestamp = null;
+    const preventExit = (event) => {
+        event.preventDefault();
+        event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', preventExit);
 
     function hideOverlay() {
         syncBlocker.style.display = 'none';
-        const progressBar = document.querySelector('.progress-bar');
-        if (progressBar) {
-            progressBar.style.display = 'none';
-        }
+        syncCard.style.display = 'none';
+        window.removeEventListener('beforeunload', preventExit);
 
         if (apiResult !== null) {
             resultsCard.style.display = 'block';
@@ -111,7 +117,12 @@ function initSyncOverlay() {
     }
 
     fetch(`../public/index.php?controller=factura&action=sincronizar`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             apiResult = Array.isArray(data.facturas) ? data.facturas : [];
             if (data.inserted_count !== undefined) {

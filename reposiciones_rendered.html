@@ -1,0 +1,2241 @@
+
+Notice: session_start(): Ignoring session_start() because a session is already active (started from C:\wamp64\www\softDW\__debug_render.php on line 2) in C:\wamp64\www\softDW\views\reposiciones.php on line 2
+
+Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\reposiciones.php on line 22
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reposiciones</title>
+    <link rel="icon" type="image/png" href="https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_32,h_32/https://darwinandwolf.com/wp-content/uploads/2025/12/Fav-50x50.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../public/css/site.css">
+    <link rel="stylesheet" href="../public/css/layout.css">
+    <link rel="stylesheet" href="../public/css/sidebar.css">
+    <style>
+        body {
+            color: #000;
+        }
+
+        .btn-ver {
+            color: #0d6efd;
+        }
+
+        .btn-cerrar {
+            color: #198754;
+        }
+
+        table thead th,
+        table tbody td {
+            text-align: center;
+        }
+
+        table tbody td.acciones {
+            text-align: left;
+        }
+
+        .acciones {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-ver,
+        .btn-cerrar {
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color .2s ease, transform .2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn-ver {
+            background-color: #0d6efd !important;
+            /* azul primary más oscuro */
+            color: #ffffff;
+        }
+
+        .btn-ver:not(.disabled):hover {
+            background-color: #000000 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-ver:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
+        .btn-ver.disabled {
+            background-color: #e5e7eb !important;
+            color: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .btn-cerrar {
+            background-color: #198754 !important;
+            /* verde más visible */
+            color: #ffffff;
+        }
+
+        .btn-cerrar i {
+            color: #ffffff !important;
+        }
+
+        .btn-cerrar:not(.disabled):hover {
+            background-color: #000000 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-cerrar:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
+        .btn-cerrar.disabled {
+            background: #6c757d !important;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .status-closed {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            background: #d1e7dd;
+            color: #0f5132;
+            font-weight: 600;
+        }
+
+        .status-open-delayed {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            background: #f8d7da;
+            color: #842029;
+            font-weight: 600;
+            border: 1px solid #f5c2c7;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 900px;
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex: 0 0 auto;
+            background: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .btn-close-modal {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #dc2626;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #ffffff;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-close-modal i {
+            color: inherit;
+            transition: color .12s ease, transform .08s ease;
+        }
+
+        .btn-close-modal:hover {
+            background: #000000 !important;
+            color: #ff3333 !important;
+            transform: translateY(-1px);
+        }
+
+        .modal-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .modal-actions button {
+            border: none;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .btn-close-factura {
+            background: #198754;
+        }
+
+        .btn-close-factura.disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .btn-ok {
+            background: #0d6efd !important;
+            /* primary blue */
+            color: #ffffff !important;
+            /* texto blanco */
+            opacity: 1 !important;
+            font-weight: 800;
+            /* más gruesa */
+            border: none;
+            cursor: pointer;
+            transition: background-color .12s ease, transform .08s ease, color .08s ease;
+            width: 44px;
+            height: 36px;
+            padding: 0;
+            /* tamaño fijo */
+            font-size: 0.95rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.18);
+        }
+
+        .btn-ok:not(.disabled):hover {
+            background: #000000 !important;
+            /* negro al pasar */
+            color: #ff3333 !important;
+            /* icono/texto rojo */
+            transform: translateY(-1px);
+        }
+
+        .btn-mark-detail,
+        .btn-remove-detail {
+            min-width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            color: #ffffff;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: background-color .2s ease, transform .2s ease;
+            width: auto !important;
+        }
+
+        .btn-mark-detail {
+            background: #15803d;
+            /* verde más oscuro para que se vea activo */
+        }
+
+        .btn-mark-detail:not(.disabled):hover {
+            background: #000000 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-mark-detail:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
+        .btn-mark-detail.disabled {
+            background: #e5e7eb !important;
+            cursor: not-allowed;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .btn-remove-detail {
+            background: #ef4444;
+        }
+
+        .btn-remove-detail:not(.disabled):hover {
+            background: #000000 !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-remove-detail:not(.disabled):hover i {
+            color: #ff3333 !important;
+        }
+
+        .btn-mark-detail.disabled+.btn-remove-detail,
+        .btn-remove-detail.disabled {
+            background: #e5e7eb;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        .modal-content table {
+            width: 100%;
+        }
+
+        .modal-content > .table-container {
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* Estados: actuales (verde pastel) y anteriores (rojo pastel) */
+        .status-actual,
+        .status-anterior {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .status-actual {
+            background: #e6ffea; /* verde pastel */
+            color: #000000; /* texto negro */
+            border: 1px solid #c9f3d0;
+        }
+
+        .status-anterior {
+            background: #ffecec; /* rojo pastel */
+            color: #000000; /* texto negro */
+            border: 1px solid #ffd6d6;
+        }
+
+        .status-short {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #reposicionesActualesTable,
+            #reposicionesAnterioresTable {
+                min-width: 0;
+                table-layout: fixed;
+            }
+
+            .card.table-container:has(#reposicionesActualesTable),
+            .card.table-container:has(#reposicionesAnterioresTable) {
+                overflow-x: hidden;
+            }
+
+            #reposicionesActualesTable th:nth-child(1),
+            #reposicionesActualesTable td:nth-child(1),
+            #reposicionesActualesTable th:nth-child(3),
+            #reposicionesActualesTable td:nth-child(3),
+            #reposicionesAnterioresTable th:nth-child(1),
+            #reposicionesAnterioresTable td:nth-child(1),
+            #reposicionesAnterioresTable th:nth-child(3),
+            #reposicionesAnterioresTable td:nth-child(3) {
+                display: none;
+            }
+
+            #reposicionesActualesTable th:nth-child(2),
+            #reposicionesActualesTable td:nth-child(2),
+            #reposicionesAnterioresTable th:nth-child(2),
+            #reposicionesAnterioresTable td:nth-child(2) {
+                width: 54%;
+                max-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            #reposicionesActualesTable th:nth-child(4),
+            #reposicionesActualesTable td:nth-child(4),
+            #reposicionesAnterioresTable th:nth-child(4),
+            #reposicionesAnterioresTable td:nth-child(4) {
+                display: none;
+            }
+
+            #reposicionesActualesTable th:nth-child(5),
+            #reposicionesActualesTable td:nth-child(5),
+            #reposicionesAnterioresTable th:nth-child(5),
+            #reposicionesAnterioresTable td:nth-child(5) {
+                white-space: nowrap;
+            }
+
+            #reposicionesActualesTable .acciones,
+            #reposicionesAnterioresTable .acciones {
+                width: 100%;
+                gap: 0.25rem;
+                justify-content: flex-end;
+            }
+
+            #reposicionesActualesTable .status-full,
+            #reposicionesAnterioresTable .status-full {
+                display: none;
+            }
+
+            #reposicionesActualesTable .status-short,
+            #reposicionesAnterioresTable .status-short {
+                display: inline;
+            }
+
+            #reposicionesActualesTable .btn-ver,
+            #reposicionesActualesTable .btn-cerrar,
+            #reposicionesAnterioresTable .btn-ver,
+            #reposicionesAnterioresTable .btn-cerrar {
+                width: 32px;
+                min-width: 32px;
+                height: 32px;
+                border-radius: 7px;
+                font-size: 0.8rem;
+            }
+
+            #reposicionesActualesTable .status-actual,
+            #reposicionesAnterioresTable .status-anterior {
+                min-width: 24px;
+                padding: 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .modal-overlay {
+                padding: 0.5rem;
+                align-items: flex-end;
+            }
+
+            .modal-content {
+                max-height: 92vh;
+                padding: 1rem;
+                border-radius: 1rem 1rem 0 0;
+            }
+
+            .modal-header {
+                align-items: flex-start;
+            }
+
+            .modal-title {
+                font-size: 1.05rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-actions button {
+                width: 100%;
+                margin-top: 0;
+            }
+
+            .detalle-actions {
+                gap: 0.35rem !important;
+            }
+
+            #detalleTable,
+            #detalleTable tbody,
+            #detalleTable tr,
+            #detalleTable td {
+                display: block;
+                width: 100%;
+                min-width: 0;
+            }
+
+            #detalleTable {
+                min-width: 0;
+            }
+
+            #detalleTable thead {
+                display: none;
+            }
+
+            #detalleTable tbody tr {
+                margin-bottom: 0.75rem;
+                padding: 0.8rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.75rem;
+                background: #fff;
+            }
+
+            #detalleTable tbody td {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 0.75rem;
+                padding: 0.55rem 0;
+                text-align: right;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            #detalleTable tbody td::before {
+                flex: 0 0 auto;
+                color: #475569;
+                font-size: 0.76rem;
+                font-weight: 700;
+                text-align: left;
+                text-transform: uppercase;
+            }
+
+            #detalleTable tbody td:nth-child(1) {
+                display: none;
+            }
+
+            #detalleTable tbody td:nth-child(2)::before {
+                content: 'Prenda';
+            }
+
+            #detalleTable tbody td:nth-child(3)::before {
+                content: 'Cantidad';
+            }
+
+            #detalleTable tbody td:nth-child(4)::before {
+                content: 'Descripción';
+            }
+
+            #detalleTable tbody td:nth-child(5)::before {
+                content: 'Estado';
+            }
+
+            #detalleTable tbody td:nth-child(6) {
+                align-items: center;
+                padding-top: 0.75rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            #detalleTable tbody td:nth-child(6)::before {
+                content: 'Acciones';
+            }
+
+            #detalleTable .detalle-actions {
+                display: inline-flex !important;
+                justify-content: flex-end;
+                gap: 0.35rem !important;
+                flex: 1;
+            }
+
+            #detalleTable .btn-mark-detail,
+            #detalleTable .btn-remove-detail {
+                width: 34px;
+                min-width: 34px;
+                height: 34px;
+                margin: 0;
+            }
+
+            #detalleTable .no-repuesto-row,
+            #detalleTable .no-repuesto-row td {
+                display: block !important;
+            }
+
+            #detalleTable .no-repuesto-form {
+                display: flex !important;
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
+            }
+
+            #detalleTable .no-repuesto-form input,
+            #detalleTable .no-repuesto-form .btn-ok {
+                width: 100%;
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    
+<header class="topbar">
+    <button type="button" class="mobile-menu-button" id="mobileMenuButton" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="logo">
+        <img src="../public/img/logo.png" alt="Logo">
+    </div>
+
+    <div class="user-menu">
+        <button type="button" class="user-button" id="userButton">
+            <i class="fa-solid fa-user"></i>
+        </button>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-user" style="color: #222;">
+                Test            </div>
+            <a href="#">
+                <i class="fa-solid fa-id-badge"></i>
+                <span>Mi Perfil</span>
+            </a>
+            <a href="../public/logout.php">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+            </a>
+        </div>
+    </div>
+</header>
+<div class="sidebar" id="sidebar">
+    <ul>
+        <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+        <li><a href="../views/botones.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
+        <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
+        <li><a href="../inventario.php"><i class="fas fa-boxes-stacked"></i><span>Inventario</span></a></li>
+        <li><a href="../views/reposiciones.php"><i class="fas fa-rotate"></i><span>Reposiciones</span></a></li>
+    </ul>
+    <div class="sidebar-footer">
+        <button class="toggle-btn toggle-btn-bottom" onclick="toggleMenu()"><i id="arrowIcon" class="fas fa-angle-left"></i></button>
+    </div>
+</div>
+    <div class="page">
+        <header>
+            <h1>Reposiciones</h1>
+            <p class="subtitle">Facturas abiertas. Solo se muestran facturas con estado abierto.</p>
+        </header>
+
+        <section class="card table-container">
+            <h2>Actuales</h2>
+            <table aria-label="Reposiciones actuales" id="reposicionesActualesTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Número Factura</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="reposicionesActualesBody">
+                                                                                                <tr>
+                                <td>1</td>
+                                <td>001-001-000037946</td>
+                                <td>2026-08-14 17:37:07</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="243" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="243" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>2</td>
+                                <td>001-001-000037947</td>
+                                <td>2026-08-14 17:37:07</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="242" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="242" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>3</td>
+                                <td>001-001-000037944</td>
+                                <td>2026-08-14 17:37:08</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="247" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="247" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>4</td>
+                                <td>001-002-000017927</td>
+                                <td>2026-08-14 17:37:08</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="246" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="246" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>5</td>
+                                <td>001-002-000017928</td>
+                                <td>2026-08-14 17:37:08</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="245" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="245" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>6</td>
+                                <td>001-002-000017926</td>
+                                <td>2026-08-14 17:37:09</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="248" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="248" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>7</td>
+                                <td>001-001-000037948</td>
+                                <td>2026-08-14 17:56:04</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="249" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="249" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>8</td>
+                                <td>001-002-000017929</td>
+                                <td>2026-08-14 17:56:05</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="250" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="250" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>9</td>
+                                <td>001-001-000037955</td>
+                                <td>2026-08-14 19:56:43</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="251" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="251" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>10</td>
+                                <td>001-001-000037954</td>
+                                <td>2026-08-14 19:56:43</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="252" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="252" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>11</td>
+                                <td>001-001-000037953</td>
+                                <td>2026-08-14 19:56:43</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="253" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="253" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>12</td>
+                                <td>001-002-000017931</td>
+                                <td>2026-08-14 19:56:44</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="254" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="254" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>13</td>
+                                <td>001-001-000037952</td>
+                                <td>2026-08-14 19:56:44</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="255" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="255" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>14</td>
+                                <td>001-001-000037951</td>
+                                <td>2026-08-14 19:56:45</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="256" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="256" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>15</td>
+                                <td>001-001-000037950</td>
+                                <td>2026-08-14 19:56:45</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="257" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="257" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>16</td>
+                                <td>001-002-000017930</td>
+                                <td>2026-08-14 19:56:46</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="258" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="258" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>17</td>
+                                <td>001-001-000037949</td>
+                                <td>2026-08-14 19:56:47</td>
+                                                                <td><span class="status-actual"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="259" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="259" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                            </tbody>
+            </table>
+        </section>
+
+        <section class="card table-container">
+            <h2>Fechas anteriores</h2>
+            <table aria-label="Reposiciones fechas anteriores" id="reposicionesAnterioresTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Número Factura</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="reposicionesAnterioresBody">
+                                                                                                <tr>
+                                <td>1</td>
+                                <td>001-004-000013620</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="109" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="109" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>2</td>
+                                <td>001-004-000013621</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="108" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="108" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>3</td>
+                                <td>001-004-000013622</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="107" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="107" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>4</td>
+                                <td>001-001-000037707</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="106" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="106" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>5</td>
+                                <td>001-004-000013623</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="105" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="105" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>6</td>
+                                <td>001-004-000013624</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="104" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="104" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>7</td>
+                                <td>001-001-000037708</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="103" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="103" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>8</td>
+                                <td>001-004-000013625</td>
+                                <td>2026-08-07 20:20:12</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="102" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="102" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>9</td>
+                                <td>001-001-000037833</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="114" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="114" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>10</td>
+                                <td>001-001-000037832</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="115" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="115" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>11</td>
+                                <td>001-001-000037831</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="116" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="116" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>12</td>
+                                <td>001-001-000037830</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="117" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="117" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>13</td>
+                                <td>001-001-000037829</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="118" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="118" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>14</td>
+                                <td>001-001-000037828</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="119" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="119" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>15</td>
+                                <td>001-002-000017903</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="120" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="120" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>16</td>
+                                <td>001-002-000017902</td>
+                                <td>2026-08-11 19:25:01</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="121" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="121" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>17</td>
+                                <td>001-002-000017904</td>
+                                <td>2026-08-11 19:29:44</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="122" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="122" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>18</td>
+                                <td>001-001-000037839</td>
+                                <td>2026-08-11 21:56:04</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="123" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="123" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>19</td>
+                                <td>001-001-000037838</td>
+                                <td>2026-08-11 21:56:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="124" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="124" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>20</td>
+                                <td>001-004-000013703</td>
+                                <td>2026-08-11 21:56:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="125" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="125" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>21</td>
+                                <td>001-001-000037837</td>
+                                <td>2026-08-11 21:56:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="126" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="126" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>22</td>
+                                <td>001-001-000037836</td>
+                                <td>2026-08-11 21:56:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="127" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="127" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>23</td>
+                                <td>001-004-000013702</td>
+                                <td>2026-08-11 21:56:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="128" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="128" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>24</td>
+                                <td>001-001-000037835</td>
+                                <td>2026-08-11 21:56:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="129" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="129" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>25</td>
+                                <td>001-001-000037840</td>
+                                <td>2026-08-11 21:59:03</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="130" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="130" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>26</td>
+                                <td>001-002-000017905</td>
+                                <td>2026-08-12 15:51:04</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="131" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="131" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>27</td>
+                                <td>001-001-000037854</td>
+                                <td>2026-08-12 15:51:04</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="132" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="132" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>28</td>
+                                <td>001-001-000037856</td>
+                                <td>2026-08-12 17:13:56</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="133" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="133" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>29</td>
+                                <td>001-001-000037855</td>
+                                <td>2026-08-12 17:13:56</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="134" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="134" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>30</td>
+                                <td>001-002-000017908</td>
+                                <td>2026-08-12 17:13:56</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="135" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="135" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>31</td>
+                                <td>001-002-000017907</td>
+                                <td>2026-08-12 17:13:56</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="136" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="136" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>32</td>
+                                <td>001-002-000017906</td>
+                                <td>2026-08-12 17:13:56</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="137" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="137" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>33</td>
+                                <td>001-001-000037911</td>
+                                <td>2026-08-13 20:03:04</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="177" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="177" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>34</td>
+                                <td>001-002-000017924</td>
+                                <td>2026-08-13 20:03:04</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="179" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="179" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>35</td>
+                                <td>001-001-000037906</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="184" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="184" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>36</td>
+                                <td>001-002-000017923</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="185" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="185" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>37</td>
+                                <td>001-001-000037905</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="186" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="186" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>38</td>
+                                <td>001-001-000037904</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="187" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="187" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>39</td>
+                                <td>001-001-000037909</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="181" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="181" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>40</td>
+                                <td>001-001-000037908</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="182" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="182" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>41</td>
+                                <td>001-001-000037907</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="183" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="183" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>42</td>
+                                <td>001-001-000037910</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="180" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="180" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>43</td>
+                                <td>001-002-000017922</td>
+                                <td>2026-08-13 20:03:05</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="188" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="188" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>44</td>
+                                <td>001-002-000017919</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="194" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="194" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>45</td>
+                                <td>001-001-000037902</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="192" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="192" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>46</td>
+                                <td>001-001-000037901</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="193" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="193" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>47</td>
+                                <td>001-002-000017921</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="189" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="189" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>48</td>
+                                <td>001-002-000017915</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="199" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="199" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>49</td>
+                                <td>001-002-000017916</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="198" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="198" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>50</td>
+                                <td>001-002-000017917</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="197" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="197" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>51</td>
+                                <td>001-001-000037903</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="191" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="191" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>52</td>
+                                <td>001-002-000017920</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="190" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="190" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>53</td>
+                                <td>001-001-000037900</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="196" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="196" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>54</td>
+                                <td>001-002-000017918</td>
+                                <td>2026-08-13 20:03:06</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="195" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="195" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>55</td>
+                                <td>001-002-000017912</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="202" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="202" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>56</td>
+                                <td>001-002-000017913</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="201" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="201" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>57</td>
+                                <td>001-002-000017914</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="200" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="200" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>58</td>
+                                <td>001-001-000037897</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="205" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="205" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>59</td>
+                                <td>001-001-000037896</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="206" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="206" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>60</td>
+                                <td>001-001-000037895</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="207" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="207" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>61</td>
+                                <td>001-001-000037894</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="208" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="208" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>62</td>
+                                <td>001-001-000037893</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="209" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="209" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>63</td>
+                                <td>001-005-000008983</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="210" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="210" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>64</td>
+                                <td>001-001-000037898</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="204" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="204" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>65</td>
+                                <td>001-001-000037899</td>
+                                <td>2026-08-13 20:03:07</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="203" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="203" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>66</td>
+                                <td>001-005-000008982</td>
+                                <td>2026-08-13 20:03:08</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="211" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="211" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>67</td>
+                                <td>001-005-000008981</td>
+                                <td>2026-08-13 20:03:08</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="212" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="212" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>68</td>
+                                <td>001-005-000008980</td>
+                                <td>2026-08-13 20:03:08</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="213" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="213" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>69</td>
+                                <td>001-005-000008979</td>
+                                <td>2026-08-13 20:03:08</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="214" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="214" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>70</td>
+                                <td>001-005-000008978</td>
+                                <td>2026-08-13 20:03:08</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="215" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="215" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>71</td>
+                                <td>001-001-000037912</td>
+                                <td>2026-08-13 20:22:34</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="216" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="216" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>72</td>
+                                <td>001-004-000013746</td>
+                                <td>2026-08-13 21:56:27</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="217" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="217" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>73</td>
+                                <td>001-004-000013745</td>
+                                <td>2026-08-13 21:56:27</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="218" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="218" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>74</td>
+                                <td>001-001-000037913</td>
+                                <td>2026-08-13 21:56:27</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="219" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="219" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>75</td>
+                                <td>001-004-000013744</td>
+                                <td>2026-08-13 21:56:28</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="220" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="220" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                    <tr>
+                                <td>76</td>
+                                <td>001-004-000013743</td>
+                                <td>2026-08-13 21:56:28</td>
+                                                                <td><span class="status-anterior"><span class="status-full">Abierta</span><span class="status-short">A</span></span></td>
+                                <td class="acciones">
+                                    <button type="button" class="btn-ver" data-id="221" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn-cerrar" data-id="221" title="Cerrar factura">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                                                            </tbody>
+            </table>
+        </section>
+
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title">Detalle de la factura</h2>
+                        <p id="modalFacturaId" style="margin: 0.25rem 0 0 0; color: #666;"></p>
+                    </div>
+                    <button type="button" class="btn-close-modal" id="closeDetail" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="table-container">
+                    <table aria-label="Detalle de factura" id="detalleTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Prenda</th>
+                                <th>Cantidad</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Repuesto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalleBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalOverlay = document.getElementById('modalOverlay');
+            const detalleBody = document.getElementById('detalleBody');
+            const closeDetail = document.getElementById('closeDetail');
+            const modalFacturaId = document.getElementById('modalFacturaId');
+            let currentFacturaId = null;
+            let currentNoRepuestoId = null;
+            let currentNoRepuestoButton = null;
+
+            function removeExistingNoRepuestoForm() {
+                const existing = detalleBody.querySelector('.no-repuesto-row');
+                if (existing) existing.remove();
+                currentNoRepuestoId = null;
+                currentNoRepuestoButton = null;
+            }
+
+            function openModal(id) {
+                removeExistingNoRepuestoForm();
+                modalOverlay.style.display = 'flex';
+                currentFacturaId = id;
+                modalFacturaId.textContent = `Factura ID: ${id}`;
+            }
+
+            function openNoRepuestoForm(idDetalle, buttonElement) {
+                removeExistingNoRepuestoForm();
+                currentNoRepuestoId = idDetalle;
+                currentNoRepuestoButton = buttonElement;
+
+                const row = buttonElement.closest('tr');
+                if (!row) return;
+
+                const formRow = document.createElement('tr');
+                formRow.className = 'no-repuesto-row';
+                const td = document.createElement('td');
+                td.colSpan = 6;
+                td.innerHTML = `
+                    <div class="no-repuesto-form" style="margin-top:0.75rem; border:1px solid #f5c2c7; background:#fff1f2; border-radius:0.75rem; padding:0.75rem; display:flex; align-items:center; gap:0.75rem;">
+                        <label style="font-weight:700; color:#842029; margin:0; white-space:nowrap;">Observación</label>
+                        <input type="text" id="noRepuestoInput" placeholder="Escribe la razón aquí..." style="flex:1; padding:0.6rem 0.85rem; border-radius:0.5rem; border:1px solid #ced4da; font-family:inherit;" />
+                        <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
+                    </div>
+                `;
+
+                formRow.appendChild(td);
+                row.parentNode.insertBefore(formRow, row.nextSibling);
+
+                const input = document.getElementById('noRepuestoInput');
+                input.focus();
+
+                document.getElementById('saveNoRepuestoButton').addEventListener('click', function() {
+                    const observacion = input.value.trim();
+                    if (observacion.length === 0) {
+                        alert('Escribe una observación antes de continuar.');
+                        input.focus();
+                        return;
+                    }
+
+                    const idDetalle = currentNoRepuestoId;
+                    const buttonEl = currentNoRepuestoButton;
+                    if (!idDetalle || !buttonEl) {
+                        removeExistingNoRepuestoForm();
+                        return;
+                    }
+
+                    fetch('reposiciones.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `action=no_repuesto&id_detalle=${encodeURIComponent(idDetalle)}&observacion=${encodeURIComponent(observacion)}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const rowEl = buttonEl.closest('tr');
+                                if (rowEl) {
+                                    rowEl.querySelector('td:nth-child(5)').textContent = 'No repuesto';
+                                    const markButton = rowEl.querySelector('.btn-mark-detail');
+                                    if (markButton) {
+                                        markButton.disabled = true;
+                                        markButton.classList.add('disabled');
+                                    }
+                                    buttonEl.disabled = true;
+                                    buttonEl.classList.add('disabled');
+                                }
+                                removeExistingNoRepuestoForm();
+                            } else {
+                                alert('No se pudo guardar la observación.');
+                            }
+                        })
+                        .catch(() => {
+                            alert('Error al guardar la observación.');
+                        });
+                });
+            }
+
+            function closeModal() {
+                removeExistingNoRepuestoForm();
+                modalOverlay.style.display = 'none';
+                detalleBody.innerHTML = '';
+                currentFacturaId = null;
+            }
+
+            document.querySelectorAll('.btn-ver').forEach(button => {
+                button.addEventListener('click', function() {
+                    const idFactura = this.dataset.id;
+                    if (!idFactura) {
+                        return;
+                    }
+
+                    fetch(`reposiciones.php?action=detalle&id_factura=${encodeURIComponent(idFactura)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const detalles = Array.isArray(data.detalles) ? data.detalles : [];
+                            detalleBody.innerHTML = detalles.length > 0 ?
+                                detalles.map((detalle, index) => `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td data-label="Prenda">${detalle.codigo_interno ?? '-'}</td>
+                                        <td data-label="Cantidad">${detalle.cantidad ?? '-'}</td>
+                                        <td data-label="Descripción">${detalle.descripcion ?? '-'}</td>
+                                        <td>${detalle.estado == 0 ? 'Abierto' : (detalle.estado == 1 ? 'Repuesto' : 'No repuesto')}</td>
+                                        <td data-label="Acciones">
+                                            <div class="detalle-actions" style="display:inline-flex; gap:0.5rem; align-items:center;">
+                                                <button type="button" class="btn-mark-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como repuesto">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                                <button type="button" class="btn-remove-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como no repuesto">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>`).join('') :
+                                '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
+
+                            bindMarkDetailButtons();
+                            openModal(idFactura);
+                        })
+                        .catch(() => {
+                            detalleBody.innerHTML = '<tr><td colspan="6">Error al cargar el detalle.</td></tr>';
+                            openModal(idFactura);
+                        });
+                });
+            });
+
+            bindCloseFacturaButtons();
+
+            function bindCloseFacturaButtons() {
+                document.querySelectorAll('.btn-cerrar').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const idFactura = this.dataset.id;
+                        if (!idFactura || this.disabled) {
+                            return;
+                        }
+
+                        const buttonElement = this;
+                        fetch('reposiciones.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `action=cerrar&id_factura=${encodeURIComponent(idFactura)}`
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const row = buttonElement.closest('tr');
+                                    if (row) {
+                                        const estadoCell = row.querySelector('td:nth-child(4)');
+                                        if (estadoCell) {
+                                            estadoCell.innerHTML = '<span class="status-closed">Cerrada</span>';
+                                        }
+                                        const viewButton = row.querySelector('.btn-ver');
+                                        [buttonElement, viewButton].forEach(el => {
+                                            if (el) {
+                                                el.disabled = true;
+                                                el.classList.add('disabled');
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    alert(data.message || 'No se puede cerrar la factura porque hay detalles abiertos.');
+                                }
+                            })
+                            .catch(() => {
+                                alert('Error al cerrar la factura.');
+                            });
+                    });
+                });
+            }
+
+            function bindMarkDetailButtons() {
+                document.querySelectorAll('.btn-mark-detail').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const idDetalle = this.dataset.detalleId;
+                        if (!idDetalle || this.disabled) {
+                            return;
+                        }
+                        const buttonElement = this;
+
+                        fetch('reposiciones.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `action=repuesto&id_detalle=${encodeURIComponent(idDetalle)}`
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    buttonElement.disabled = true;
+                                    buttonElement.classList.add('disabled');
+                                    const row = buttonElement.closest('tr');
+                                    if (row) {
+                                        row.querySelector('td:nth-child(5)').textContent = 'Repuesto';
+                                        const removeButton = row.querySelector('.btn-remove-detail');
+                                        if (removeButton) {
+                                            removeButton.disabled = true;
+                                            removeButton.classList.add('disabled');
+                                        }
+                                    }
+                                } else {
+                                    alert('No se pudo marcar el detalle como repuesto.');
+                                }
+                            })
+                            .catch(() => {
+                                alert('Error al marcar el detalle como repuesto.');
+                            });
+                    });
+                });
+
+                document.querySelectorAll('.btn-remove-detail').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const idDetalle = this.dataset.detalleId;
+                        if (!idDetalle || this.disabled) {
+                            return;
+                        }
+                        openNoRepuestoForm(idDetalle, this);
+                    });
+                });
+            }
+
+            closeDetail.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', function(event) {
+                if (event.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+    <script src="../public/js/menu.js"></script>
+</body>
+
+</html>

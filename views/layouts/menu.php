@@ -37,9 +37,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
         <li><a href="../views/botones.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
         <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
-        <li><a href="inventario.php"><i class="fas fa-boxes-stacked"></i><span>Inventario</span></a></li>
         <li><a href="../views/reposiciones.php"><i class="fas fa-rotate"></i><span>Reposiciones</span></a></li>
-        <li><a href="reportes.php"><i class="fas fa-chart-column"></i><span>Reportes</span></a></li>
     </ul>
     <div class="sidebar-footer">
         <button class="toggle-btn toggle-btn-bottom" onclick="toggleMenu()"><i id="arrowIcon" class="fas fa-angle-left"></i></button>

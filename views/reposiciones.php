@@ -19,7 +19,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'detalle' && isset($_GET['id_f
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'cerrar' && isset($_POST['id_factura'])) {
         $idFactura = intval($_POST['id_factura']);
         $success = $model->cerrarFactura($idFactura);
@@ -762,7 +762,6 @@ foreach ($facturas as $factura) {
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <script>

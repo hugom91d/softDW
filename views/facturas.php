@@ -79,6 +79,14 @@ if (!isset($_SESSION['cedula'])) {
                 align-items: center;
                 justify-content: center;
             }
+
+            #facturasTable .mobile-header-break {
+                display: inline;
+            }
+        }
+
+        .mobile-header-break {
+            display: none;
         }
     </style>
 </head>
@@ -110,7 +118,7 @@ if (!isset($_SESSION['cedula'])) {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Número Factura</th>
+                        <th>Número<span class="mobile-header-break"><br></span> Factura</th>
                         <th>Cliente</th>
                         <th>Total</th>
                         <th>Acción</th>
