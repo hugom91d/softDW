@@ -10,7 +10,7 @@
             margin: 0;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: #f4f5f7;
-            color: #222;
+            color: #fff;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -28,9 +28,9 @@
         .card {
             width: 100%;
             max-width: 420px;
-            background: #ffffff;
+            background: #0b0b0b;
             border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(18, 38, 63, 0.08);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
             padding: 32px;
         }
 
@@ -41,16 +41,23 @@
             }
         }
 
-        h2 {
-            margin-top: 0;
-            text-align: center;
-            color: #0f172a;
+        .login-logo {
+            display: block;
+            width: min(220px, 80%);
+            height: auto;
+            margin: 0 auto 22px;
         }
 
         .subtitle {
             text-align: center;
-            color: #64748b;
-            margin-bottom: 25px;
+            color: #d1d5db;
+            margin: 0 0 25px;
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #fff;
         }
 
         .form-group {
@@ -60,7 +67,7 @@
         label {
             display: block;
             font-size: 0.95rem;
-            color: #444;
+            color: #fff;
             margin-bottom: 8px;
         }
 
@@ -68,16 +75,19 @@
             width: 100%;
             box-sizing: border-box;
             padding: 12px 14px;
-            border: 1px solid #d5d7dc;
+            border: 1px solid #cfd3d8;
             border-radius: 10px;
             font-size: 0.95rem;
+            background: #fff;
+            color: #111827;
         }
 
 
 
         input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #e60000;
+            box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.2);
         }
 
         button {
@@ -85,28 +95,30 @@
             padding: 12px;
             border: none;
             border-radius: 10px;
-            background: #2563eb;
-            color: white;
+            background: #e60000;
+            color: #fff;
             font-size: 1rem;
+            font-weight: 800;
             cursor: pointer;
             transition: background 0.2s ease;
         }
 
         button:hover {
-            background: #1d4ed8;
+            background: #b80000;
+            color: #fff;
         }
 
         #mensaje {
             margin-top: 15px;
             text-align: center;
-            color: #dc2626;
+            color: #ff6b6b;
         }
     </style>
 </head>
 
 <body>
     <div class="card">
-        <h2>Iniciar Sesión</h2>
+        <img class="login-logo" src="../public/img/logo.png" alt="Darwin and Wolf">
         <p class="subtitle">Ingrese sus credenciales para continuar</p>
 
         <form id="loginForm" action="../services/ValidarLogin.php" method="POST">
