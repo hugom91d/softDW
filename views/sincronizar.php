@@ -46,17 +46,18 @@ $fechaHoy = date('d/m/Y');
             <h2>Facturas consultadas</h2>
             <p id="resultsSummary">Facturas encontradas para la fecha de hoy (<?= htmlspecialchars($fechaHoy) ?>): 0</p>
             <div class="table-container">
-                <table id="resultsTable">
+                <table id="resultsTable" data-pagination="true">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Documento</th>
                             <th>Cliente</th>
-                            <th>Total</th>
+                            <th class="currency-cell">Total</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody"></tbody>
                 </table>
+                <div class="table-pagination" id="resultsTablePagination" aria-label="Paginación de resultados"></div>
             </div>
             <p id="noResultsMessage" style="display:none;">No se encontraron facturas para hoy o nuevas por sincronizar.</p>
         </section>

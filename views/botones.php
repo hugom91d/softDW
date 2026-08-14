@@ -37,15 +37,6 @@ if (!isset($_SESSION['cedula'])) {
                         <div class="action-label">Facturas</div>
                     </button>
 
-                    <button class="action-button" id="btnProductos" title="Productos">
-                        <div class="action-icon"><i class="fa-solid fa-box-open fa-2x"></i></div>
-                        <div class="action-label">Productos</div>
-                    </button>
-
-                    <button class="action-button" id="btnStock" title="Stock Productos">
-                        <div class="action-icon"><i class="fa-solid fa-layer-group fa-2x"></i></div>
-                        <div class="action-label">Stock Productos</div>
-                    </button>
                 </div>
             </div>
         </section>
@@ -134,13 +125,6 @@ if (!isset($_SESSION['cedula'])) {
                 window.location.href = '../views/sincronizar.php';
             });
 
-            document.getElementById('btnProductos')?.addEventListener('click', function() {
-                alert('Función Productos: pendiente de desarrollo.');
-            });
-
-            document.getElementById('btnStock')?.addEventListener('click', function() {
-                alert('Función Stock Productos: pendiente de desarrollo.');
-            });
         });
     </script>
 </body>

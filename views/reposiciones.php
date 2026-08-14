@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['cedula'])) {
     header('Location: login.php');
     exit;
@@ -383,6 +385,65 @@ foreach ($facturas as $factura) {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
+
+        .system-notification {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 11000;
+        }
+
+        .system-notification.show {
+            display: flex;
+        }
+
+        .system-notification-content {
+            width: min(440px, 100%);
+            padding: 1.25rem;
+            border-radius: 0.85rem;
+            background: #fff;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .system-notification-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 0.9rem;
+            color: #111827;
+            font-size: 1rem;
+        }
+
+        .system-notification-title i {
+            color: #0d6efd;
+        }
+
+        .system-notification-message {
+            margin: 0 0 1.15rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .system-notification-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .system-notification-button {
+            width: auto;
+            min-width: 88px;
+            margin: 0;
+            padding: 0.65rem 1rem;
+            background: #0d6efd;
+        }
+
+        .system-notification-button:hover {
+            background: #0a58ca;
+        }
         /* Estados: actuales (verde pastel) y anteriores (rojo pastel) */
         .status-actual,
         .status-anterior {
@@ -646,7 +707,7 @@ foreach ($facturas as $factura) {
 
         <section class="card table-container">
             <h2>Actuales</h2>
-            <table aria-label="Reposiciones actuales" id="reposicionesActualesTable">
+            <table aria-label="Reposiciones actuales" id="reposicionesActualesTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -688,11 +749,12 @@ foreach ($facturas as $factura) {
                     <?php endif; ?>
                 </tbody>
             </table>
+            <div class="table-pagination" id="reposicionesActualesTablePagination" aria-label="Paginación de reposiciones actuales"></div>
         </section>
 
         <section class="card table-container">
             <h2>Fechas anteriores</h2>
-            <table aria-label="Reposiciones fechas anteriores" id="reposicionesAnterioresTable">
+            <table aria-label="Reposiciones fechas anteriores" id="reposicionesAnterioresTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -734,6 +796,7 @@ foreach ($facturas as $factura) {
                     <?php endif; ?>
                 </tbody>
             </table>
+            <div class="table-pagination" id="reposicionesAnterioresTablePagination" aria-label="Paginación de reposiciones anteriores"></div>
         </section>
 
         <div class="modal-overlay" id="modalOverlay">
@@ -746,7 +809,7 @@ foreach ($facturas as $factura) {
                     <button type="button" class="btn-close-modal" id="closeDetail" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="table-container">
-                    <table aria-label="Detalle de factura" id="detalleTable">
+                    <table aria-label="Detalle de factura" id="detalleTable" data-pagination="true">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -759,6 +822,20 @@ foreach ($facturas as $factura) {
                         </thead>
                         <tbody id="detalleBody"></tbody>
                     </table>
+                    <div class="table-pagination" id="detalleTablePagination" aria-label="Paginación del detalle"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="system-notification" id="systemNotification" role="alertdialog" aria-modal="true" aria-labelledby="systemNotificationTitle">
+            <div class="system-notification-content">
+                <h2 class="system-notification-title" id="systemNotificationTitle">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>localhost</span>
+                </h2>
+                <p class="system-notification-message" id="systemNotificationMessage"></p>
+                <div class="system-notification-actions">
+                    <button type="button" class="system-notification-button" id="systemNotificationAccept">Aceptar</button>
                 </div>
             </div>
         </div>
@@ -770,9 +847,22 @@ foreach ($facturas as $factura) {
             const detalleBody = document.getElementById('detalleBody');
             const closeDetail = document.getElementById('closeDetail');
             const modalFacturaId = document.getElementById('modalFacturaId');
+            const systemNotification = document.getElementById('systemNotification');
+            const systemNotificationMessage = document.getElementById('systemNotificationMessage');
+            const systemNotificationAccept = document.getElementById('systemNotificationAccept');
             let currentFacturaId = null;
             let currentNoRepuestoId = null;
             let currentNoRepuestoButton = null;
+
+            function showSystemNotification(message) {
+                systemNotificationMessage.textContent = message;
+                systemNotification.classList.add('show');
+                systemNotificationAccept.focus();
+            }
+
+            function closeSystemNotification() {
+                systemNotification.classList.remove('show');
+            }
 
             function removeExistingNoRepuestoForm() {
                 const existing = detalleBody.querySelector('.no-repuesto-row');
@@ -817,7 +907,7 @@ foreach ($facturas as $factura) {
                 document.getElementById('saveNoRepuestoButton').addEventListener('click', function() {
                     const observacion = input.value.trim();
                     if (observacion.length === 0) {
-                        alert('Escribe una observación antes de continuar.');
+                        showSystemNotification('Escribe una observación antes de continuar.');
                         input.focus();
                         return;
                     }
@@ -852,11 +942,11 @@ foreach ($facturas as $factura) {
                                 }
                                 removeExistingNoRepuestoForm();
                             } else {
-                                alert('No se pudo guardar la observación.');
+                                showSystemNotification('No se pudo guardar la observación.');
                             }
                         })
                         .catch(() => {
-                            alert('Error al guardar la observación.');
+                            showSystemNotification('Error al guardar la observación.');
                         });
                 });
             }
@@ -901,6 +991,7 @@ foreach ($facturas as $factura) {
                                 '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
 
                             bindMarkDetailButtons();
+                            refreshTablePagination('detalleTable');
                             openModal(idFactura);
                         })
                         .catch(() => {
@@ -946,11 +1037,11 @@ foreach ($facturas as $factura) {
                                         });
                                     }
                                 } else {
-                                    alert(data.message || 'No se puede cerrar la factura porque hay detalles abiertos.');
+                                    showSystemNotification(data.message || 'No se puede cerrar la factura porque hay detalles abiertos.');
                                 }
                             })
                             .catch(() => {
-                                alert('Error al cerrar la factura.');
+                                showSystemNotification('Error al cerrar la factura.');
                             });
                     });
                 });
@@ -987,11 +1078,11 @@ foreach ($facturas as $factura) {
                                         }
                                     }
                                 } else {
-                                    alert('No se pudo marcar el detalle como repuesto.');
+                                    showSystemNotification('No se pudo marcar el detalle como repuesto.');
                                 }
                             })
                             .catch(() => {
-                                alert('Error al marcar el detalle como repuesto.');
+                                showSystemNotification('Error al marcar el detalle como repuesto.');
                             });
                     });
                 });
@@ -1008,6 +1099,17 @@ foreach ($facturas as $factura) {
             }
 
             closeDetail.addEventListener('click', closeModal);
+            systemNotificationAccept.addEventListener('click', closeSystemNotification);
+            systemNotification.addEventListener('click', function(event) {
+                if (event.target === systemNotification) {
+                    closeSystemNotification();
+                }
+            });
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeSystemNotification();
+                }
+            });
             modalOverlay.addEventListener('click', function(event) {
                 if (event.target === modalOverlay) {
                     closeModal();

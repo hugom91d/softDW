@@ -33,6 +33,77 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+const PAGINATION_PAGE_SIZE = 10;
+
+function formatCurrency(value) {
+    const amount = Number.parseFloat(value);
+    const formatted = Number.isFinite(amount)
+        ? amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : '0.00';
+    return `<span class="currency-symbol">$</span><span class="currency-value">${formatted}</span>`;
+}
+
+function refreshTablePagination(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table || table.dataset.pagination !== 'true') return;
+
+    const body = table.tBodies[0];
+    const rows = body ? Array.from(body.rows).filter(row => !row.classList.contains('pagination-empty')) : [];
+    const pagination = document.getElementById(`${tableId}Pagination`);
+    if (!body || !pagination) return;
+
+    const pageCount = Math.max(1, Math.ceil(rows.length / PAGINATION_PAGE_SIZE));
+    let currentPage = Number.parseInt(table.dataset.page || '1', 10);
+    currentPage = Math.min(Math.max(currentPage, 1), pageCount);
+    table.dataset.page = String(currentPage);
+
+    rows.forEach((row, index) => {
+        const firstRow = (currentPage - 1) * PAGINATION_PAGE_SIZE;
+        row.style.display = index >= firstRow && index < firstRow + PAGINATION_PAGE_SIZE ? '' : 'none';
+    });
+
+    pagination.innerHTML = '';
+    if (rows.length <= PAGINATION_PAGE_SIZE) {
+        pagination.style.display = 'none';
+        return;
+    }
+
+    pagination.style.display = 'flex';
+    const previous = document.createElement('button');
+    previous.type = 'button';
+    previous.className = 'pagination-button';
+    previous.textContent = 'Anterior';
+    previous.disabled = currentPage === 1;
+    previous.addEventListener('click', () => {
+        table.dataset.page = String(currentPage - 1);
+        refreshTablePagination(tableId);
+    });
+
+    const status = document.createElement('span');
+    status.className = 'pagination-status';
+    status.textContent = `Página ${currentPage} de ${pageCount}`;
+
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'pagination-button';
+    next.textContent = 'Siguiente';
+    next.disabled = currentPage === pageCount;
+    next.addEventListener('click', () => {
+        table.dataset.page = String(currentPage + 1);
+        refreshTablePagination(tableId);
+    });
+
+    pagination.append(previous, status, next);
+}
+
+function initTablePagination() {
+    document.querySelectorAll('table[data-pagination="true"]').forEach(table => {
+        refreshTablePagination(table.id);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initTablePagination);
+
 function initSyncOverlay() {
     const progressFill = document.getElementById('progressFill');
     const syncStatus = document.getElementById('syncStatus');
@@ -80,13 +151,15 @@ function initSyncOverlay() {
                             <td>${index + 1}</td>
                             <td>${factura.documento ?? '-'}</td>
                             <td>${factura.cliente?.nombre_comercial ?? '-'}</td>
-                            <td>${factura.total ?? '-'}</td>
+                            <td class="currency-cell">${formatCurrency(factura.total)}</td>
                         </tr>`)
                     .join('');
+                refreshTablePagination('resultsTable');
                 noResultsMessage.style.display = 'none';
             } else {
                 resultsSummary.textContent = `Facturas sincronizadas para la fecha de hoy (${fechaHoy}): 0`;
                 resultsBody.innerHTML = '';
+                refreshTablePagination('resultsTable');
                 noResultsMessage.style.display = 'block';
             }
         }

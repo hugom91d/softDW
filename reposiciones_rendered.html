@@ -1,7 +1,3 @@
-
-Notice: session_start(): Ignoring session_start() because a session is already active (started from C:\wamp64\www\softDW\__debug_render.php on line 2) in C:\wamp64\www\softDW\views\reposiciones.php on line 2
-
-Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\reposiciones.php on line 22
 <!DOCTYPE html>
 <html lang="es">
 
@@ -607,7 +603,6 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
         <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
         <li><a href="../views/botones.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
         <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
-        <li><a href="../inventario.php"><i class="fas fa-boxes-stacked"></i><span>Inventario</span></a></li>
         <li><a href="../views/reposiciones.php"><i class="fas fa-rotate"></i><span>Reposiciones</span></a></li>
     </ul>
     <div class="sidebar-footer">
@@ -622,7 +617,7 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
 
         <section class="card table-container">
             <h2>Actuales</h2>
-            <table aria-label="Reposiciones actuales" id="reposicionesActualesTable">
+            <table aria-label="Reposiciones actuales" id="reposicionesActualesTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -873,11 +868,12 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
                             </tr>
                                                             </tbody>
             </table>
+            <div class="table-pagination" id="reposicionesActualesTablePagination" aria-label="Paginación de reposiciones actuales"></div>
         </section>
 
         <section class="card table-container">
             <h2>Fechas anteriores</h2>
-            <table aria-label="Reposiciones fechas anteriores" id="reposicionesAnterioresTable">
+            <table aria-label="Reposiciones fechas anteriores" id="reposicionesAnterioresTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -1954,6 +1950,7 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
                             </tr>
                                                             </tbody>
             </table>
+            <div class="table-pagination" id="reposicionesAnterioresTablePagination" aria-label="Paginación de reposiciones anteriores"></div>
         </section>
 
         <div class="modal-overlay" id="modalOverlay">
@@ -1966,7 +1963,7 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
                     <button type="button" class="btn-close-modal" id="closeDetail" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="table-container">
-                    <table aria-label="Detalle de factura" id="detalleTable">
+                    <table aria-label="Detalle de factura" id="detalleTable" data-pagination="true">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -1979,6 +1976,7 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
                         </thead>
                         <tbody id="detalleBody"></tbody>
                     </table>
+                    <div class="table-pagination" id="detalleTablePagination" aria-label="Paginación del detalle"></div>
                 </div>
             </div>
         </div>
@@ -2121,6 +2119,7 @@ Warning: Undefined array key "REQUEST_METHOD" in C:\wamp64\www\softDW\views\repo
                                 '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
 
                             bindMarkDetailButtons();
+                            refreshTablePagination('detalleTable');
                             openModal(idFactura);
                         })
                         .catch(() => {

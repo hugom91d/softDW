@@ -201,7 +201,7 @@ $totalAnteriores = count($facturasAnteriores);
 
         <section class="dashboard-section dashboard-invoices">
             <h2>Últimas facturas abiertas</h2>
-            <table class="dashboard-table">
+            <table class="dashboard-table" id="dashboardInvoicesTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -229,6 +229,7 @@ $totalAnteriores = count($facturasAnteriores);
                     <?php endif; ?>
                 </tbody>
             </table>
+            <div class="table-pagination" id="dashboardInvoicesTablePagination" aria-label="Paginación del dashboard"></div>
         </section>
     </div>
     <script src="../public/js/menu.js"></script>

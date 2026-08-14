@@ -310,6 +310,65 @@ button:hover {
     -webkit-overflow-scrolling: touch;
 }
 
+.table-pagination {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.pagination-button {
+    width: auto;
+    min-width: 92px;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: .85rem;
+}
+
+.pagination-status {
+    color: #475569;
+    font-size: .85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.currency-cell {
+    text-align: left;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.currency-symbol {
+    display: inline-block;
+    width: auto;
+    margin-right: .35rem;
+    text-align: center;
+}
+
+.currency-value {
+    display: inline-block;
+    width: 7ch;
+    min-width: 7ch;
+    text-align: right;
+}
+
+@media (max-width: 480px) {
+    .table-pagination {
+        gap: 8px;
+    }
+
+    .pagination-button {
+        min-width: 0;
+        padding: 8px 9px;
+        font-size: .78rem;
+    }
+
+    .pagination-status {
+        font-size: .78rem;
+    }
+}
+
 table {
     width: 100%;
     border-collapse: collapse;

@@ -80,6 +80,11 @@ if (!isset($_SESSION['cedula'])) {
                 justify-content: center;
             }
 
+            #facturasTable th:nth-child(4),
+            #facturasTable td:nth-child(4) {
+                text-align: left;
+            }
+
             #facturasTable .mobile-header-break {
                 display: inline;
             }
@@ -87,6 +92,10 @@ if (!isset($_SESSION['cedula'])) {
 
         .mobile-header-break {
             display: none;
+        }
+
+        #facturasTable th:nth-child(4) {
+            text-align: left;
         }
     </style>
 </head>
@@ -114,7 +123,7 @@ if (!isset($_SESSION['cedula'])) {
         </section>
 
         <section class="card table-container">
-            <table aria-label="Lista de facturas" id="facturasTable">
+            <table aria-label="Lista de facturas" id="facturasTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -133,7 +142,7 @@ if (!isset($_SESSION['cedula'])) {
                                     <td><?= ++$contador ?></td>
                                     <td><span class="invoice-number"><?= htmlspecialchars($factura['documento'] ?? '-') ?></span></td>
                                     <td><?= $factura['cliente']['nombre_comercial'] ?></td>
-                                    <td><?= $factura['total'] ?></td>
+                                    <td class="currency-cell"><span class="currency-symbol">$</span><span class="currency-value"><?= number_format((float)($factura['total'] ?? 0), 2, '.', ',') ?></span></td>
                                     <td class="acciones">
                                         <!-- <button type="button" class="btn-ver" data-id="<?= $factura['id'] ?>" title="Ver detalle">
                                             <i class="fa-solid fa-eye"></i>
@@ -157,6 +166,7 @@ if (!isset($_SESSION['cedula'])) {
                     <?php endif; ?>
                 </tbody>
             </table>
+            <div class="table-pagination" id="facturasTablePagination" aria-label="Paginación de facturas"></div>
         </section>
     </div>
     <script src="../public/js/menu.js"></script>
