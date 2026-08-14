@@ -9,6 +9,17 @@ require_once __DIR__ . '/../models/FacturaModel.php';
 
 $model = new FacturaModel();
 $facturas = $model->getFacturasAbiertasHoy();
+$facturas = array_values(array_filter($facturas, 'is_array'));
+usort($facturas, static function (array $facturaA, array $facturaB): int {
+    $fechaA = strtotime((string)($facturaA['fecha'] ?? '')) ?: 0;
+    $fechaB = strtotime((string)($facturaB['fecha'] ?? '')) ?: 0;
+
+    if ($fechaA === $fechaB) {
+        return (int)($facturaB['id_factura'] ?? 0) <=> (int)($facturaA['id_factura'] ?? 0);
+    }
+
+    return $fechaB <=> $fechaA;
+});
 $facturasActuales = [];
 $facturasAnteriores = [];
 $hoy = (new DateTime())->format('Y-m-d');
@@ -214,7 +225,7 @@ $totalAnteriores = count($facturasAnteriores);
                     <?php if (!empty($facturas)): ?>
                         <?php $count = 0; ?>
                         <?php foreach ($facturas as $factura): ?>
-                            <?php if ($count >= 8) break; ?>
+                            <?php if ($count >= 10) break; ?>
                             <tr>
                                 <td><?= ++$count ?></td>
                                 <td><?= htmlspecialchars($factura['numero_factura'] ?? $factura['documento'] ?? '-') ?></td>
