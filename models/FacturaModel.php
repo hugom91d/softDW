@@ -85,12 +85,13 @@ class FacturaModel
         }
 
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = NOW() WHERE id_factura = ? AND estado = 0");
+        $fechaCierre = (new DateTime('now', new DateTimeZone('America/Guayaquil')))->format('Y-m-d H:i:s');
+        $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = ? WHERE id_factura = ? AND estado = 0");
         if (!$stmt) {
             return false;
         }
 
-        $stmt->bind_param('i', $idFactura);
+        $stmt->bind_param('si', $fechaCierre, $idFactura);
         $success = $stmt->execute();
         $affected = $stmt->affected_rows;
         $stmt->close();

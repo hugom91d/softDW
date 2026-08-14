@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/Guayaquil');
+
 $host = "localhost";
 $usuario = "dwadmin";
 $password = "DWadmin2026";
