@@ -897,7 +897,7 @@ foreach ($facturas as $factura) {
                         <select id="noRepuestoInput" required style="flex:1; padding:0.6rem 0.85rem; border-radius:0.5rem; border:1px solid #ced4da; font-family:inherit;">
                             <option value="">Selecciona una opción</option>
                             <option value="No hay stock en GPS">No hay stock en GPS</option>
-                            <option value="No hay stock en Quito">No hay stock en Quito</option>
+                            <option value="Solicitar stock a Quito">Solicitar stock a Quito</option>
                         </select>
                         <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
                     </div>
