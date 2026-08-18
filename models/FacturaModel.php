@@ -228,10 +228,17 @@ class FacturaModel
         return $row['codigo'] ?? null;
     }
 
+    private const PRODUCTOS_ID_EXCLUIDOS = ['KVeZYXp6kHyJyd8P', 'O8bYWX0EzSPrPe7j', 'loejZVl7OikWkeQM'];
+
     private function insertarDetalleFacturaLocal(int $idFactura, array $detalle): bool
     {
         $productoNombre = $detalle['producto_nombre'] ?? '';
         $productoDescripcion = $detalle['producto_descipcion'] ?? '';
+        $codigoPrenda = $detalle['producto_id'] ?? '';
+
+        if (in_array((string) $codigoPrenda, self::PRODUCTOS_ID_EXCLUIDOS, true)) {
+            return false;
+        }
 
         $textoComparacion = mb_strtolower(trim($productoNombre . ' ' . $productoDescripcion), 'UTF-8');
         if (str_contains($textoComparacion, 'envio') || str_contains($textoComparacion, 'shipping')) {
@@ -239,7 +246,6 @@ class FacturaModel
         }
 
         $cantidad = isset($detalle['cantidad']) ? (int) $detalle['cantidad'] : 0;
-        $codigoPrenda = $detalle['producto_id'] ?? '';
         $codigoInterno = $this->obtenerCodigoInternoProducto((string) $codigoPrenda);
         $descripcion = $productoNombre ?: $productoDescripcion;
         $estado = 0;

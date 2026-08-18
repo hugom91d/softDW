@@ -34,10 +34,17 @@ if (session_status() === PHP_SESSION_NONE) {
 </header>
 <div class="sidebar" id="sidebar">
     <ul>
+        <?php if (($_SESSION['rol'] ?? '') !== 'operador'): ?>
         <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+        <?php endif; ?>
         <li><a href="../views/botones.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
+        <?php if (($_SESSION['rol'] ?? '') !== 'operador'): ?>
         <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
+        <?php endif; ?>
         <li><a href="../views/reposiciones.php"><i class="fas fa-rotate"></i><span>Reposiciones</span></a></li>
+        <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>
+        <li><a href="../views/usuarios.php"><i class="fas fa-users-cog"></i><span>Usuarios</span></a></li>
+        <?php endif; ?>
     </ul>
     <div class="sidebar-footer">
         <button class="toggle-btn toggle-btn-bottom" onclick="toggleMenu()"><i id="arrowIcon" class="fas fa-angle-left"></i></button>

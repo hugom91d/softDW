@@ -1,0 +1,102 @@
+<?php
+
+class UsuarioModel
+{
+    public function listar(): array
+    {
+        $conn = $this->getConnection();
+        $result = $conn->query('SELECT Cedula, Nombre, Rol, Estado FROM usuarios ORDER BY Nombre ASC');
+        $usuarios = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+        return is_array($usuarios) ? $usuarios : [];
+    }
+
+    public function buscarPorCedula(string $cedula): ?array
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('SELECT Cedula, Nombre, Rol, Estado FROM usuarios WHERE Cedula = ? LIMIT 1');
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('s', $cedula);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $usuario = $resultado ? $resultado->fetch_assoc() : null;
+        $stmt->close();
+
+        return $usuario ?: null;
+    }
+
+    public function cedulaExiste(string $cedula): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('SELECT 1 FROM usuarios WHERE Cedula = ? LIMIT 1');
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('s', $cedula);
+        $stmt->execute();
+        $stmt->store_result();
+        $existe = $stmt->num_rows > 0;
+        $stmt->close();
+
+        return $existe;
+    }
+
+    public function crear(string $cedula, string $nombre, string $contrasena, string $rol, int $estado): bool
+    {
+        $hash = password_hash($contrasena, PASSWORD_DEFAULT);
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('INSERT INTO usuarios (Cedula, Nombre, Rol, Contrasena, Estado) VALUES (?, ?, ?, ?, ?)');
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('ssssi', $cedula, $nombre, $rol, $hash, $estado);
+        $success = $stmt->execute();
+        $stmt->close();
+
+        return $success;
+    }
+
+    public function actualizar(string $cedula, string $nombre, string $rol, int $estado): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('UPDATE usuarios SET Nombre = ?, Rol = ?, Estado = ? WHERE Cedula = ?');
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('ssis', $nombre, $rol, $estado, $cedula);
+        $success = $stmt->execute();
+        $stmt->close();
+
+        return $success;
+    }
+
+    public function actualizarContrasena(string $cedula, string $contrasena): bool
+    {
+        $hash = password_hash($contrasena, PASSWORD_DEFAULT);
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('UPDATE usuarios SET Contrasena = ? WHERE Cedula = ?');
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('ss', $hash, $cedula);
+        $success = $stmt->execute();
+        $stmt->close();
+
+        return $success;
+    }
+
+    private function getConnection(): mysqli
+    {
+        require __DIR__ . '/../config/database.php';
+        return $conn;
+    }
+}

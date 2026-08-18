@@ -4,6 +4,10 @@ if (!isset($_SESSION['cedula'])) {
     header('Location: login.php');
     exit;
 }
+if (($_SESSION['rol'] ?? '') === 'operador') {
+    header('Location: reposiciones.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

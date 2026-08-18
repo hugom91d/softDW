@@ -3,13 +3,26 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+session_start();
+if (!isset($_SESSION['cedula'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$controller = $_GET['controller'] ?? 'factura';
+$action = $_GET['action'] ?? 'listar';
+
+$accionesPermitidasOperador = ['sincronizar'];
+if (($_SESSION['rol'] ?? '') === 'operador' && !in_array($action, $accionesPermitidasOperador, true)) {
+    http_response_code(403);
+    echo "Acceso no autorizado";
+    exit;
+}
+
 require_once '../services/HttpClient.php';
 require_once '../services/FacturaApi.php';
 require_once '../models/FacturaModel.php';
 require_once '../controllers/FacturaController.php';
-
-$controller = $_GET['controller'] ?? 'factura';
-$action = $_GET['action'] ?? 'listar';
 
 switch ($controller) {
 

@@ -4,6 +4,10 @@ if (!isset($_SESSION['cedula'])) {
     header('Location: login.php');
     exit;
 }
+if (($_SESSION['rol'] ?? '') === 'operador') {
+    header('Location: reposiciones.php');
+    exit;
+}
 
 require_once __DIR__ . '/../models/FacturaModel.php';
 
