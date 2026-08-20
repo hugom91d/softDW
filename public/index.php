@@ -3,9 +3,9 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
+session_start(['cookie_path' => '/']);
 if (!isset($_SESSION['cedula'])) {
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 

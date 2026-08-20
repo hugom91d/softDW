@@ -1,5 +1,5 @@
 <?php
-session_start();
+session_start(['cookie_path' => '/']);
 require_once '../config/database.php';
 
 $cedula = trim($_POST['cedula'] ?? '');

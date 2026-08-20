@@ -1,6 +1,6 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_start(['cookie_path' => '/']);
 }
 ?>
 
@@ -40,6 +40,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <li><a href="../views/botones.php"><i class="fas fa-sync-alt"></i><span>Sincronizar</span></a></li>
         <?php if (($_SESSION['rol'] ?? '') !== 'operador'): ?>
         <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
+        <?php endif; ?>
+        <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>
+        <li><a href="../views/stock.php"><i class="fas fa-boxes-stacked"></i><span>Stock</span></a></li>
         <?php endif; ?>
         <li><a href="../views/reposiciones.php"><i class="fas fa-right-left"></i><span>Reposiciones</span></a></li>
         <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>

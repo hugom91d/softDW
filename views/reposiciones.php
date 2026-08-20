@@ -1,9 +1,9 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_start(['cookie_path' => '/']);
 }
 if (!isset($_SESSION['cedula'])) {
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 
