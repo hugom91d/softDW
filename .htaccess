@@ -1,0 +1,7 @@
+# Permitir acceso solo desde la IP autorizada y desde localhost
+<RequireAny>
+    Require ip 157.100.188.192
+    Require ip 127.0.0.1
+</RequireAny>
+
+ErrorDocument 403 /acceso-denegado.php
