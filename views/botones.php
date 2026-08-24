@@ -18,6 +18,7 @@ if (!isset($_SESSION['cedula'])) {
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
+    <link rel="stylesheet" href="../public/css/botones.css">
 </head>
 
 <body>
@@ -43,90 +44,7 @@ if (!isset($_SESSION['cedula'])) {
     </div>
 
     <script src="../public/js/menu.js"></script>
-    <style>
-        .sync-quick-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
-            align-items: stretch;
-            flex-wrap: wrap;
-            padding: 1rem 0;
-        }
-
-        .action-button {
-            width: 150px;
-            height: 150px;
-            border-radius: 12px;
-            border: 1px solid #e6e6e6;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-            transition: transform .12s ease, box-shadow .12s ease;
-        }
-
-        .action-button:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);    
-        }
-
-        .action-icon {
-            width: 64px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: #f3f4f6;
-        }
-
-        .action-label {
-            font-weight: 700;
-            color: #0f172a;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .sync-quick-actions {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 0.75rem;
-            }
-
-            .action-button {
-                width: 100%;
-                height: 130px;
-            }
-
-            .action-icon {
-                width: 52px;
-                height: 52px;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .sync-quick-actions {
-                grid-template-columns: 1fr;
-            }
-
-            .action-button {
-                height: 112px;
-            }
-        }
-    </style>
-
-    <script>    
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('btnFacturas')?.addEventListener('click', function() {
-                window.location.href = '../views/sincronizar.php';
-            });
-
-        });
-    </script>
+    <script src="../public/js/botones.js"></script>
 </body>
 
 </html>

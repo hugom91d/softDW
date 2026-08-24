@@ -39,21 +39,7 @@ if ($busqueda !== '') {
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
-    <style>
-        .stock-value {
-            font-variant-numeric: tabular-nums;
-            font-weight: 600;
-        }
-
-        .stock-na {
-            color: #9ca3af;
-            font-weight: 400;
-        }
-
-        .stock-bajo {
-            color: #991b1b;
-        }
-    </style>
+    <link rel="stylesheet" href="../public/css/stock.css">
 </head>
 
 <body>

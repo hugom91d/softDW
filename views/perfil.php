@@ -120,95 +120,7 @@ if (!$usuario) {
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
-    <style>
-        .profile-card {
-            max-width: 720px;
-        }
-
-        .profile-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
-        }
-
-        .profile-field {
-            margin-bottom: 1rem;
-        }
-
-        .profile-field.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .profile-field label {
-            margin-bottom: 0.4rem;
-        }
-
-        .profile-field input {
-            margin-top: 0;
-        }
-
-        .password-field {
-            position: relative;
-        }
-
-        .password-field input {
-            padding-right: 3rem;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 0.55rem;
-            bottom: 0.35rem;
-            width: 36px;
-            height: 36px;
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            color: #475569;
-        }
-
-        .password-toggle:hover {
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        .profile-message {
-            padding: 0.8rem 1rem;
-            margin-bottom: 1rem;
-            border-radius: 0.6rem;
-            font-weight: 600;
-        }
-
-        .profile-message.success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .profile-message.error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .profile-section-title {
-            margin: 1.5rem 0 1rem;
-            color: #0f172a;
-            font-size: 1.1rem;
-        }
-
-        .profile-readonly {
-            background: #f8fafc;
-        }
-
-        @media (max-width: 600px) {
-            .profile-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-field.full-width {
-                grid-column: auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../public/css/perfil.css">
 </head>
 <body>
     <?php require_once __DIR__ . '/layouts/menu.php'; ?>
@@ -270,17 +182,6 @@ if (!$usuario) {
     </div>
 
     <script src="../public/js/menu.js"></script>
-    <script>
-        document.querySelectorAll('.password-toggle').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const input = document.getElementById(this.dataset.target);
-                const icon = this.querySelector('i');
-                const visible = input.type === 'text';
-                input.type = visible ? 'password' : 'text';
-                icon.className = visible ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
-                this.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
-            });
-        });
-    </script>
+    <script src="../public/js/perfil.js"></script>
 </body>
 </html>
