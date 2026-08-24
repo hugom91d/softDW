@@ -1,3 +1,6 @@
+<?php
+$error = isset($_GET['error']) && $_GET['error'] === '1';
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_32,h_32/https://darwinandwolf.com/wp-content/uploads/2025/12/Fav-50x50.png">
-    <title>Login Básico</title>
+    <title>Login GPS - DW</title>
     <style>
         body {
             margin: 0;
@@ -83,8 +86,6 @@
             color: #111827;
         }
 
-
-
         input:focus {
             outline: none;
             border-color: #e60000;
@@ -109,15 +110,73 @@
             color: #fff;
         }
 
-        #mensaje {
-            margin-top: 15px;
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal {
+            width: min(92vw, 360px);
+            background: #1a1a1a;
+            border: 1px solid #ff6b6b;
+            border-radius: 16px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+            padding: 24px 20px 18px;
             text-align: center;
-            color: #ff6b6b;
+            color: #fff;
+        }
+
+        .modal-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            margin: 0 0 8px;
+            color: #ffb4b4;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .modal-message {
+            margin: 0 0 18px;
+            color: #f3f4f6;
+            line-height: 1.5;
+        }
+
+        .modal-button {
+            border: none;
+            background: #e60000;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .modal-button:hover {
+            background: #b80000;
         }
     </style>
 </head>
 
 <body>
+    <?php if ($error): ?>
+        <div class="modal-backdrop" id="errorModal">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                <div class="modal-icon">⚠️</div>
+                <h3 class="modal-title" id="modalTitle">Error de acceso</h3>
+                <p class="modal-message">Usuario o contraseña incorrectos.</p>
+                <button type="button" class="modal-button" onclick="document.getElementById('errorModal').style.display='none';">Cerrar</button>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div class="card">
         <img class="login-logo" src="../public/img/logo.png" alt="Darwin and Wolf">
         <p class="subtitle">Ingrese sus credenciales para continuar</p>
@@ -139,10 +198,7 @@
 
             <button type="submit">Ingresar</button>
         </form>
-
-        <p id="mensaje"></p>
     </div>
-
 </body>
 
 </html>

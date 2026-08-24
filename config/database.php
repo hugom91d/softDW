@@ -2,10 +2,10 @@
 
 date_default_timezone_set('America/Guayaquil');
 
-$host = "localhost";
-$usuario = "dwadmin";
-$password = "DWadmin2026";
-$baseDatos = "darwinandwolf";
+$host = "157.90.5.84";
+$usuario = "darwinan_gps";
+$password = "lvh38KjM5lzXcrV)";
+$baseDatos = "darwinan_gpsGestion";
 
 $conn = new mysqli(
     $host,

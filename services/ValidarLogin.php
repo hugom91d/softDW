@@ -24,4 +24,5 @@ if ($resultado->num_rows === 1) {
     }
 }
 
-echo 'Usuario o contraseña incorrectos.';
+header('Location: ../public/login.php?error=1');
+exit;

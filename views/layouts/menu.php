@@ -41,6 +41,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <?php if (($_SESSION['rol'] ?? '') !== 'operador'): ?>
         <li><a href="../views/facturas.php"><i class="fas fa-file-invoice"></i><span>Facturas</span></a></li>
         <?php endif; ?>
+        <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>
+        <li><a href="../views/stock.php"><i class="fas fa-boxes-stacked"></i><span>Stock</span></a></li>
+        <?php endif; ?>
         <li><a href="../views/reposiciones.php"><i class="fas fa-right-left"></i><span>Reposiciones</span></a></li>
         <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>
         <li><a href="../views/usuarios.php"><i class="fas fa-users-cog"></i><span>Usuarios</span></a></li>
