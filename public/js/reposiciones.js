@@ -6,8 +6,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const systemNotification = document.getElementById('systemNotification');
     const systemNotificationMessage = document.getElementById('systemNotificationMessage');
     const systemNotificationAccept = document.getElementById('systemNotificationAccept');
+    const syncNewInvoicesButton = document.getElementById('syncNewInvoicesButton');
     let currentNoRepuestoId = null;
     let currentNoRepuestoButton = null;
+
+    if (syncNewInvoicesButton) {
+        syncNewInvoicesButton.addEventListener('click', async function() {
+            const button = this;
+            const originalIcon = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                const response = await fetch('../public/index.php?controller=factura&action=sincronizar');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const insertedCount = Number(data.inserted_count ?? 0);
+
+                if (insertedCount > 0) {
+                    showSystemNotification(`Sincronización completada. ${insertedCount} facturas guardadas.`);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+                    return;
+                }
+
+                showSystemNotification('Sincronización completada. No hay facturas nuevas por guardar.');
+            } catch (error) {
+                showSystemNotification('Error al sincronizar facturas: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalIcon;
+            }
+        });
+    }
 
     function showSystemNotification(message) {
         systemNotificationMessage.textContent = message;

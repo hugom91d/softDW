@@ -1,3 +1,43 @@
+.header-with-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.sync-new-invoices {
+    width: 54px;
+    height: 54px;
+    border: 2px solid #000000;
+    border-radius: 14px;
+    background: #d22b2b;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.18);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sync-new-invoices:hover {
+    transform: translateY(-1px);
+    background: #b91c1c;
+    border-color: #000000;
+}
+
+.sync-new-invoices i {
+    font-size: 1.5rem;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.sync-new-invoices:disabled {
+    cursor: wait;
+    opacity: 0.75;
+}
+
 .btn-ver {
     color: #0d6efd;
 }

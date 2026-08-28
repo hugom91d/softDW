@@ -85,9 +85,14 @@ foreach ($facturas as $factura) {
 <body>
     <?php require_once __DIR__ . '/layouts/menu.php'; ?>
     <div class="page">
-        <header>
-            <h1>Reposiciones</h1>
-            <p class="subtitle">Facturas abiertas. Solo se muestran facturas con estado abierto.</p>
+        <header class="header-with-action">
+            <div>
+                <h1>Reposiciones</h1>
+                <p class="subtitle">Facturas abiertas. Solo se muestran facturas con estado abierto.</p>
+            </div>
+            <button type="button" class="sync-new-invoices" id="syncNewInvoicesButton" title="Sincronizar nuevas facturas" aria-label="Sincronizar nuevas facturas">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
         </header>
 
         <section class="card table-container">
@@ -216,7 +221,7 @@ foreach ($facturas as $factura) {
             <div class="system-notification-content">
                 <h2 class="system-notification-title" id="systemNotificationTitle">
                     <i class="fa-solid fa-circle-info"></i>
-                    <span>localhost</span>
+                    <span>Darwin and Wolf</span>
                 </h2>
                 <p class="system-notification-message" id="systemNotificationMessage"></p>
                 <div class="system-notification-actions">
