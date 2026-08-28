@@ -121,7 +121,7 @@ foreach ($facturas as $factura) {
                                 // Para facturas actuales mostramos estado en verde pastel
                                 $statusClass = 'status-actual';
                                 ?>
-                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
+                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span></span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
@@ -168,7 +168,7 @@ foreach ($facturas as $factura) {
                                 // Para facturas en fechas anteriores mostramos estado en rojo pastel
                                 $statusClass = 'status-anterior';
                                 ?>
-                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
+                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span></span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
