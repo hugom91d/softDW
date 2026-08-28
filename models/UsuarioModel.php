@@ -2,6 +2,11 @@
 
 class UsuarioModel
 {
+    public function __construct()
+    {
+        $this->asegurarColumnaDebeCambiarContrasena();
+    }
+
     public function listar(): array
     {
         $conn = $this->getConnection();
@@ -50,7 +55,7 @@ class UsuarioModel
         $hash = password_hash($contrasena, PASSWORD_DEFAULT);
 
         $conn = $this->getConnection();
-        $stmt = $conn->prepare('INSERT INTO usuarios (Cedula, Nombre, Rol, Contrasena, Estado) VALUES (?, ?, ?, ?, ?)');
+        $stmt = $conn->prepare('INSERT INTO usuarios (Cedula, Nombre, Rol, Contrasena, Estado, DebeCambiarContrasena) VALUES (?, ?, ?, ?, ?, 1)');
         if (!$stmt) {
             return false;
         }
@@ -82,7 +87,7 @@ class UsuarioModel
         $hash = password_hash($contrasena, PASSWORD_DEFAULT);
 
         $conn = $this->getConnection();
-        $stmt = $conn->prepare('UPDATE usuarios SET Contrasena = ? WHERE Cedula = ?');
+        $stmt = $conn->prepare('UPDATE usuarios SET Contrasena = ?, DebeCambiarContrasena = 0 WHERE Cedula = ?');
         if (!$stmt) {
             return false;
         }
@@ -92,6 +97,33 @@ class UsuarioModel
         $stmt->close();
 
         return $success;
+    }
+
+    public function debeCambiarContrasena(string $cedula): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('SELECT DebeCambiarContrasena FROM usuarios WHERE Cedula = ? LIMIT 1');
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('s', $cedula);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        $valor = $resultado && $resultado->num_rows > 0 ? $resultado->fetch_assoc()['DebeCambiarContrasena'] ?? 0 : 0;
+        $stmt->close();
+
+        return (int) $valor === 1;
+    }
+
+    private function asegurarColumnaDebeCambiarContrasena(): void
+    {
+        $conn = $this->getConnection();
+        $resultado = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'DebeCambiarContrasena'");
+
+        if ($resultado && $resultado->num_rows === 0) {
+            $conn->query("ALTER TABLE usuarios ADD COLUMN DebeCambiarContrasena TINYINT(1) NOT NULL DEFAULT 1 AFTER Contrasena");
+        }
     }
 
     private function getConnection(): mysqli

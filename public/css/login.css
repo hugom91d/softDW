@@ -150,3 +150,25 @@ button:hover {
 .modal-button:hover {
     background: #b80000;
 }
+
+.modal-password {
+    width: min(92vw, 420px);
+}
+
+.modal-form-group {
+    text-align: left;
+    margin-bottom: 14px;
+}
+
+.modal-form-group label {
+    margin-bottom: 8px;
+    display: block;
+    color: #fff;
+}
+
+.modal-error {
+    margin: 0 0 12px;
+    color: #ffd1d1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}

@@ -9,6 +9,11 @@ if (!isset($_SESSION['cedula'])) {
     exit;
 }
 
+if (!empty($_SESSION['fuerza_cambio_password'])) {
+    header('Location: ../views/cambiar_password.php');
+    exit;
+}
+
 $controller = $_GET['controller'] ?? 'factura';
 $action = $_GET['action'] ?? 'listar';
 

@@ -1,5 +1,9 @@
 <?php
+session_start();
 $error = isset($_GET['error']) && $_GET['error'] === '1';
+$forceChange = isset($_GET['force_change']) && $_GET['force_change'] === '1' && !empty($_SESSION['cedula']) && !empty($_SESSION['fuerza_cambio_password']);
+$resetError = $_SESSION['reset_error'] ?? '';
+unset($_SESSION['reset_error']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -20,6 +24,33 @@ $error = isset($_GET['error']) && $_GET['error'] === '1';
                 <h3 class="modal-title" id="modalTitle">Error de acceso</h3>
                 <p class="modal-message">Usuario o contraseña incorrectos.</p>
                 <button type="button" class="modal-button" onclick="document.getElementById('errorModal').style.display='none';">Cerrar</button>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($forceChange): ?>
+        <div class="modal-backdrop" id="forcePasswordModal">
+            <div class="modal modal-password" role="dialog" aria-modal="true" aria-labelledby="forcePasswordTitle">
+                <div class="modal-icon">🔐</div>
+                <h3 class="modal-title" id="forcePasswordTitle">Cambio obligatorio</h3>
+                <p class="modal-message">Debes actualizar tu contraseña antes de continuar.</p>
+
+                <?php if ($resetError !== ''): ?>
+                    <p class="modal-error"><?= htmlspecialchars($resetError) ?></p>
+                <?php endif; ?>
+
+                <form action="../services/ValidarLogin.php" method="POST" autocomplete="off">
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="form-group modal-form-group">
+                        <label for="nueva_password_modal">Nueva contraseña:</label>
+                        <input type="password" id="nueva_password_modal" name="nueva_password" required>
+                    </div>
+                    <div class="form-group modal-form-group">
+                        <label for="confirmacion_password_modal">Confirmar contraseña:</label>
+                        <input type="password" id="confirmacion_password_modal" name="confirmacion_password" required>
+                    </div>
+                    <button type="submit" class="modal-button">Guardar y entrar</button>
+                </form>
             </div>
         </div>
     <?php endif; ?>

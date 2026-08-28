@@ -8,11 +8,17 @@ if (!isset($_SESSION['cedula'])) {
     exit;
 }
 
+if (!empty($_SESSION['fuerza_cambio_password'])) {
+    header('Location: cambiar_password.php');
+    exit;
+}
+
 require_once __DIR__ . '/../config/database.php';
 
 $cedulaSesion = (string) $_SESSION['cedula'];
 $mensaje = '';
 $tipoMensaje = '';
+$forzarCambio = !empty($_SESSION['fuerza_cambio_password']);
 
 if (empty($_SESSION['perfil_csrf'])) {
     $_SESSION['perfil_csrf'] = bin2hex(random_bytes(32));
@@ -71,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($contrasenaNueva !== '') {
                 $hash = password_hash($contrasenaNueva, PASSWORD_DEFAULT);
-                $stmtContrasena = $conn->prepare('UPDATE usuarios SET Contrasena = ? WHERE Cedula = ?');
+                $stmtContrasena = $conn->prepare('UPDATE usuarios SET Contrasena = ?, DebeCambiarContrasena = 0 WHERE Cedula = ?');
                 if ($stmtContrasena) {
                     $stmtContrasena->bind_param('ss', $hash, $cedulaSesion);
                     $contrasenaActualizada = $stmtContrasena->execute();
@@ -81,6 +87,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($nombreActualizado && ($contrasenaNueva === '' || $contrasenaActualizada)) {
                 $_SESSION['nombre'] = $nombre;
+                if ($forzarCambio && $contrasenaNueva !== '') {
+                    $stmtFinal = $conn->prepare('UPDATE usuarios SET DebeCambiarContrasena = 0 WHERE Cedula = ?');
+                    if ($stmtFinal) {
+                        $stmtFinal->bind_param('s', $cedulaSesion);
+                        $stmtFinal->execute();
+                        $stmtFinal->close();
+                    }
+                    $_SESSION['fuerza_cambio_password'] = false;
+                    header('Location: ../views/facturas.php');
+                    exit;
+                }
                 $mensaje = 'Los datos del perfil se actualizaron correctamente.';
                 $tipoMensaje = 'success';
             } else {
@@ -127,13 +144,19 @@ if (!$usuario) {
     <div class="page">
         <header>
             <h1>Mi Perfil</h1>
-            <p class="subtitle">Consulta y actualiza tus datos personales.</p>
+            <p class="subtitle"><?= $forzarCambio ? 'Debes cambiar tu contraseña antes de continuar.' : 'Consulta y actualiza tus datos personales.' ?></p>
         </header>
 
         <section class="card profile-card">
             <?php if ($mensaje !== ''): ?>
                 <div class="profile-message <?= htmlspecialchars($tipoMensaje) ?>" role="status">
                     <?= htmlspecialchars($mensaje) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($forzarCambio): ?>
+                <div class="profile-message warning" role="status">
+                    Este es tu primer acceso. Debes cambiar tu contraseña para continuar usando el sistema.
                 </div>
             <?php endif; ?>
 
@@ -152,7 +175,7 @@ if (!$usuario) {
                     </div>
                 </div>
 
-                <h2 class="profile-section-title">Cambiar contraseña</h2>
+                <h2 class="profile-section-title"><?= $forzarCambio ? 'Cambiar contraseña obligatoria' : 'Cambiar contraseña' ?></h2>
 
                 <div class="profile-grid">
                     <div class="profile-field full-width password-field">
@@ -175,7 +198,7 @@ if (!$usuario) {
                 </div>
 
                 <div class="button-group">
-                    <button type="submit">Guardar cambios</button>
+                    <button type="submit"><?= $forzarCambio ? 'Guardar nueva contraseña' : 'Guardar cambios' ?></button>
                 </div>
             </form>
         </section>
