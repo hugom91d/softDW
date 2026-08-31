@@ -3,6 +3,50 @@
     font-weight: 600;
 }
 
+.table-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.page-size-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-size-form select {
+    min-width: 72px;
+}
+
+.stock-pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.stock-table-pagination {
+    margin-top: 0;
+}
+
+.pagination-status {
+    font-variant-numeric: tabular-nums;
+}
+
 .stock-na {
     color: #9ca3af;
     font-weight: 400;
