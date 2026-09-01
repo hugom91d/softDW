@@ -2,8 +2,9 @@
     display: inline-block;
     min-width: 3.5rem;
     padding: 0.35rem 0.7rem;
-    border: 1px solid transparent;
+    border: 1px solid #111111;
     border-radius: 999px;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 5px 8px rgba(0, 0, 0, 0.12);
     font-variant-numeric: tabular-nums;
     font-weight: 600;
 }
@@ -65,12 +66,10 @@
 .stock-critico {
     color: #111827;
     background: color-mix(in srgb, var(--stock-color) 14%, white);
-    border-color: color-mix(in srgb, var(--stock-color) 42%, white);
 }
 
 .stock-advertencia,
 .stock-disponible {
     color: #111827;
     background: color-mix(in srgb, var(--stock-color) 14%, white);
-    border-color: color-mix(in srgb, var(--stock-color) 42%, white);
 }
