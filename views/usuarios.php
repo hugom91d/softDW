@@ -101,10 +101,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tipoMensaje = 'error';
             }
         }
+    } elseif ($accion === 'cambiar_estado') {
+        $cedula = trim((string) ($_POST['cedula'] ?? ''));
+        $estado = (int) ($_POST['estado'] ?? 0) === 1 ? 1 : 0;
+
+        if (!$model->buscarPorCedula($cedula)) {
+            $mensaje = 'El usuario indicado no existe.';
+            $tipoMensaje = 'error';
+        } elseif ($cedula === (string) $_SESSION['cedula'] && $estado === 0) {
+            $mensaje = 'No puedes desactivar tu propio usuario.';
+            $tipoMensaje = 'error';
+        } elseif ($model->actualizarEstado($cedula, $estado)) {
+            $mensaje = $estado === 1 ? 'Usuario activado correctamente.' : 'Usuario desactivado correctamente.';
+            $tipoMensaje = 'success';
+        } else {
+            $mensaje = 'No se pudo actualizar el estado del usuario.';
+            $tipoMensaje = 'error';
+        }
     }
 }
 
 $usuarios = $model->listar();
+$configuracionActiva = 'usuarios';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -119,15 +137,18 @@ $usuarios = $model->listar();
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
     <link rel="stylesheet" href="../public/css/usuarios.css">
+    <link rel="stylesheet" href="../public/css/configuracion.css">
 </head>
 
 <body>
     <?php require_once __DIR__ . '/layouts/menu.php'; ?>
     <div class="page">
         <header>
-            <h1>Administración de Usuarios</h1>
+            <h1>Configuración</h1>
             <p class="subtitle">Crea y gestiona los accesos al sistema.</p>
         </header>
+
+        <?php require __DIR__ . '/layouts/configuracion_tabs.php'; ?>
 
         <?php if ($mensaje !== ''): ?>
             <div class="usuarios-message <?= htmlspecialchars($tipoMensaje) ?>" role="status">
@@ -209,6 +230,17 @@ $usuarios = $model->listar();
                                         <span class="badge <?= $usuario['Estado'] == 1 ? 'badge-activo' : 'badge-inactivo' ?>">
                                             <?= $usuario['Estado'] == 1 ? 'Activo' : 'Inactivo' ?>
                                         </span>
+                                        <form method="POST" class="estado-form">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['usuarios_csrf']) ?>">
+                                            <input type="hidden" name="accion" value="cambiar_estado">
+                                            <input type="hidden" name="cedula" value="<?= htmlspecialchars($usuario['Cedula']) ?>">
+                                            <input type="hidden" name="estado" value="<?= $usuario['Estado'] == 1 ? '0' : '1' ?>">
+                                            <label class="estado-switch" title="<?= $usuario['Estado'] == 1 ? 'Desactivar usuario' : 'Activar usuario' ?>">
+                                                <input type="checkbox" <?= $usuario['Estado'] == 1 ? 'checked' : '' ?> <?= $usuario['Cedula'] === (string) $_SESSION['cedula'] ? 'disabled' : '' ?> onchange="this.form.requestSubmit()">
+                                                <span class="estado-slider" aria-hidden="true"></span>
+                                                <span class="sr-only"><?= $usuario['Estado'] == 1 ? 'Desactivar usuario' : 'Activar usuario' ?></span>
+                                            </label>
+                                        </form>
                                     </td>
                                     <td class="acciones">
                                         <button type="button" class="btn-editar btn-editar-usuario"

@@ -1,4 +1,9 @@
 .stock-value {
+    display: inline-block;
+    min-width: 3.5rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
 }
@@ -57,6 +62,15 @@
     font-weight: 400;
 }
 
-.stock-bajo {
-    color: #991b1b;
+.stock-critico {
+    color: #111827;
+    background: color-mix(in srgb, var(--stock-color) 14%, white);
+    border-color: color-mix(in srgb, var(--stock-color) 42%, white);
+}
+
+.stock-advertencia,
+.stock-disponible {
+    color: #111827;
+    background: color-mix(in srgb, var(--stock-color) 14%, white);
+    border-color: color-mix(in srgb, var(--stock-color) 42%, white);
 }

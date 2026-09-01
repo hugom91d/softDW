@@ -10,8 +10,13 @@ if (($_SESSION['rol'] ?? '') === 'operador') {
 }
 
 require_once __DIR__ . '/../models/FacturaModel.php';
+require_once __DIR__ . '/../models/ProductoModel.php';
+require_once __DIR__ . '/../models/ConfiguracionStockModel.php';
 
 $model = new FacturaModel();
+$productoModel = new ProductoModel();
+$configuracionStock = (new ConfiguracionStockModel())->obtener();
+$stockBajoPorBodega = $productoModel->contarStockBajoPorBodega($configuracionStock['limite_critico']);
 $facturas = $model->getFacturasAbiertasHoy();
 $facturas = array_values(array_filter($facturas, 'is_array'));
 usort($facturas, static function (array $facturaA, array $facturaB): int {
@@ -52,7 +57,7 @@ $totalAnteriores = count($facturasAnteriores);
     <link rel="stylesheet" href="../public/css/site.css">
     <link rel="stylesheet" href="../public/css/layout.css">
     <link rel="stylesheet" href="../public/css/sidebar.css">
-    <link rel="stylesheet" href="../public/css/dashboard.css">
+    <link rel="stylesheet" href="../public/css/dashboard.css?v=<?= filemtime(__DIR__ . '/../public/css/dashboard.css') ?>">
 </head>
 
 <body>
@@ -64,6 +69,21 @@ $totalAnteriores = count($facturasAnteriores);
         </header>
 
         <section class="dashboard-grid">
+            <article class="dashboard-card stock-alert-card">
+                <h2><?= $stockBajoPorBodega['uio'] ?></h2>
+                <p>Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?> en UIO.</p>
+                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock UIO</a>
+            </article>
+            <article class="dashboard-card stock-alert-card">
+                <h2><?= $stockBajoPorBodega['baltra'] ?></h2>
+                <p>Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?> en Baltra.</p>
+                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock Baltra</a>
+            </article>
+            <article class="dashboard-card stock-alert-card">
+                <h2><?= $stockBajoPorBodega['ayora'] ?></h2>
+                <p>Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?> en Puerto Ayora.</p>
+                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock Ayora</a>
+            </article>
             <article class="dashboard-card">
                 <h2><?= $totalActuales ?></h2>
                 <p>Facturas abiertas hoy.</p>

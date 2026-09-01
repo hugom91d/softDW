@@ -37,3 +37,14 @@ foreach ($camposProductos as $campo => $tipo) {
         $conn->query("ALTER TABLE productos ADD COLUMN $campo $tipo");
     }
 }
+
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS configuracion_stock (
+        id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+        limite_critico DECIMAL(10,2) NOT NULL DEFAULT 5,
+        limite_advertencia DECIMAL(10,2) NOT NULL DEFAULT 10,
+        color_critico CHAR(7) NOT NULL DEFAULT '#dc2626',
+        color_advertencia CHAR(7) NOT NULL DEFAULT '#d97706',
+        color_disponible CHAR(7) NOT NULL DEFAULT '#16a34a'
+    )"
+);

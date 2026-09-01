@@ -12,8 +12,10 @@ if (($_SESSION['rol'] ?? '') !== 'admin') {
 }
 
 require_once __DIR__ . '/../models/ProductoModel.php';
+require_once __DIR__ . '/../models/ConfiguracionStockModel.php';
 
 $model = new ProductoModel();
+$configuracionStock = (new ConfiguracionStockModel())->obtener();
 $busqueda = trim((string) ($_GET['buscar'] ?? ''));
 $porPagina = in_array((int) ($_GET['por_pagina'] ?? 10), [10, 20, 50, 100], true)
     ? (int) ($_GET['por_pagina'] ?? 10)
@@ -30,6 +32,15 @@ $totalProductos = (int) $resultado['total'];
 $totalPaginas = (int) $resultado['total_paginas'];
 $desde = $totalProductos > 0 ? (($pagina - 1) * $porPagina) + 1 : 0;
 $hasta = min($pagina * $porPagina, $totalProductos);
+$claseStock = static function ($cantidad) use ($configuracionStock): string {
+    $cantidad = (float) ($cantidad ?? 0);
+
+    if ($cantidad < $configuracionStock['limite_critico']) {
+        return 'stock-critico';
+    }
+
+    return $cantidad < $configuracionStock['limite_advertencia'] ? 'stock-advertencia' : 'stock-disponible';
+};
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -92,9 +103,9 @@ $hasta = min($pagina * $porPagina, $totalProductos);
                                     <td><?= (($pagina - 1) * $porPagina) + $indice + 1 ?></td>
                                     <td><?= htmlspecialchars($item['codigo']) ?></td>
                                     <td><?= htmlspecialchars($item['descripcion']) ?></td>
-                                    <td class="stock-value <?= ($item['stock_uio'] ?? 0) <= 0 ? 'stock-bajo' : '' ?>"><?= number_format((float) ($item['stock_uio'] ?? 0), 0) ?></td>
-                                    <td class="stock-value <?= ($item['stock_baltra'] ?? 0) <= 0 ? 'stock-bajo' : '' ?>"><?= number_format((float) ($item['stock_baltra'] ?? 0), 0) ?></td>
-                                    <td class="stock-value <?= ($item['stock_puerto_ayora'] ?? 0) <= 0 ? 'stock-bajo' : '' ?>"><?= number_format((float) ($item['stock_puerto_ayora'] ?? 0), 0) ?></td>
+                                    <td><span class="stock-value <?= $claseStock($item['stock_uio'] ?? 0) ?>" style="--stock-color: <?= htmlspecialchars($configuracionStock['color_' . substr($claseStock($item['stock_uio'] ?? 0), 6)]) ?>"><?= number_format((float) ($item['stock_uio'] ?? 0), 0) ?></span></td>
+                                    <td><span class="stock-value <?= $claseStock($item['stock_baltra'] ?? 0) ?>" style="--stock-color: <?= htmlspecialchars($configuracionStock['color_' . substr($claseStock($item['stock_baltra'] ?? 0), 6)]) ?>"><?= number_format((float) ($item['stock_baltra'] ?? 0), 0) ?></span></td>
+                                    <td><span class="stock-value <?= $claseStock($item['stock_puerto_ayora'] ?? 0) ?>" style="--stock-color: <?= htmlspecialchars($configuracionStock['color_' . substr($claseStock($item['stock_puerto_ayora'] ?? 0), 6)]) ?>"><?= number_format((float) ($item['stock_puerto_ayora'] ?? 0), 0) ?></span></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

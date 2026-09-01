@@ -97,6 +97,34 @@ class ProductoModel
         ];
     }
 
+    public function contarStockBajoPorBodega(float $limiteCritico = 5): array
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            'SELECT
+                SUM(CASE WHEN COALESCE(stock_uio, 0) < ? THEN 1 ELSE 0 END) AS uio,
+                SUM(CASE WHEN COALESCE(stock_baltra, 0) < ? THEN 1 ELSE 0 END) AS baltra,
+                SUM(CASE WHEN COALESCE(stock_puerto_ayora, 0) < ? THEN 1 ELSE 0 END) AS ayora
+            FROM productos'
+        );
+
+        if (!$stmt) {
+            return ['uio' => 0, 'baltra' => 0, 'ayora' => 0];
+        }
+
+        $stmt->bind_param('ddd', $limiteCritico, $limiteCritico, $limiteCritico);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stockBajo = $result ? $result->fetch_assoc() : [];
+        $stmt->close();
+
+        return [
+            'uio' => (int) ($stockBajo['uio'] ?? 0),
+            'baltra' => (int) ($stockBajo['baltra'] ?? 0),
+            'ayora' => (int) ($stockBajo['ayora'] ?? 0),
+        ];
+    }
+
     private function contarProductos(mysqli $conn, string $whereSql, array $params, string $types): int
     {
         $sql = 'SELECT COUNT(*) AS total FROM productos' . $whereSql;

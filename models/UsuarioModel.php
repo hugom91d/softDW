@@ -82,6 +82,21 @@ class UsuarioModel
         return $success;
     }
 
+    public function actualizarEstado(string $cedula, int $estado): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('UPDATE usuarios SET Estado = ? WHERE Cedula = ?');
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('is', $estado, $cedula);
+        $success = $stmt->execute();
+        $stmt->close();
+
+        return $success;
+    }
+
     public function actualizarContrasena(string $cedula, string $contrasena): bool
     {
         $hash = password_hash($contrasena, PASSWORD_DEFAULT);
