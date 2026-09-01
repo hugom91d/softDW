@@ -3,6 +3,11 @@
     font-weight: 600;
 }
 
+#stockTable th,
+#stockTable td {
+     text-align: center;
+}
+
 .table-meta {
     display: flex;
     justify-content: space-between;
