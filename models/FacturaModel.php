@@ -42,7 +42,7 @@ class FacturaModel
     {
         $conn = $this->getConnection();
         $stmt = $conn->prepare(
-            "SELECT id_factura, numero_factura, fecha, fecha_cierre, estado, id_responsable
+            "SELECT id_factura, numero_factura, fecha, fecha_cierre, estado, id_responsable, sede
             FROM factura
             WHERE estado = 0
             ORDER BY fecha DESC, id_factura DESC"
@@ -211,13 +211,14 @@ class FacturaModel
         $fecha = $this->parseFechaEmision($factura['fecha_emision'] ?? '', $factura['hora_emision'] ?? '');
         $estado = 0;
         $idResponsable = 1719893057;
+        $sede = str_starts_with($numeroFactura, '002-002') ? 'Baltra' : 'Pto. Ayora';
 
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("INSERT INTO factura (numero_factura, fecha, fecha_cierre, estado, id_responsable) VALUES (?, ?, NULL, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO factura (numero_factura, fecha, fecha_cierre, estado, id_responsable, sede) VALUES (?, ?, NULL, ?, ?, ?)");
         if (!$stmt) {
             return 0;
         }
-        $stmt->bind_param('ssii', $numeroFactura, $fecha, $estado, $idResponsable);
+        $stmt->bind_param('ssiis', $numeroFactura, $fecha, $estado, $idResponsable, $sede);
         $stmt->execute();
 
         $insertId = $stmt->insert_id;
@@ -294,10 +295,6 @@ class FacturaModel
         $inserted = [];
 
         foreach ($facturas as $factura) {
-            if (strpos($factura['documento'] ?? '', '002-002') !== false) {
-                continue;
-            }
-
             $idFactura = $this->insertarFacturaLocal($factura);
             if ($idFactura <= 0) {
                 continue;

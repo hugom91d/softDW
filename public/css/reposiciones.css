@@ -38,6 +38,46 @@
     opacity: 0.75;
 }
 
+.sede-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    border-bottom: 1px solid #dbe1e8;
+}
+
+.sede-tab {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #475569;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 0.6rem 0.9rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sede-tab.active {
+    border-bottom-color: #000000;
+    color: #000000;
+}
+
+.sede-tab:hover,
+.sede-tab:focus-visible {
+    background: #262626;
+    color: #ffffff;
+    outline: none;
+}
+
+.sede-tab.active:hover,
+.sede-tab.active:focus-visible {
+    border-bottom-color: #000000;
+}
+
+tr[data-sede].sede-hidden {
+    display: none;
+}
+
 .btn-ver {
     color: #0d6efd;
 }

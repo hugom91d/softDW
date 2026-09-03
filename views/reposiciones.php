@@ -53,18 +53,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['action']))
 }
 
 $facturas = $model->getFacturasAbiertasHoy();
-$facturasActuales = [];
-$facturasAnteriores = [];
+$facturasPtoAyoraActuales = [];
+$facturasPtoAyoraAnteriores = [];
+$facturasBaltraActuales = [];
+$facturasBaltraAnteriores = [];
 $hoy = (new DateTime())->format('Y-m-d');
 
 foreach ($facturas as $factura) {
     $fechaFactura = (new DateTime($factura['fecha']))->format('Y-m-d');
-    if ($fechaFactura === $hoy) {
-        $facturasActuales[] = $factura;
+    $esBaltra = ($factura['sede'] ?? '') === 'Baltra';
+
+    if ($fechaFactura === $hoy && $esBaltra) {
+        $facturasBaltraActuales[] = $factura;
+    } elseif ($fechaFactura === $hoy) {
+        $facturasPtoAyoraActuales[] = $factura;
+    } elseif ($esBaltra) {
+        $facturasBaltraAnteriores[] = $factura;
     } else {
-        $facturasAnteriores[] = $factura;
+        $facturasPtoAyoraAnteriores[] = $factura;
     }
 }
+
+$facturasActuales = array_merge($facturasPtoAyoraActuales, $facturasBaltraActuales);
+$facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAnteriores);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -94,6 +105,11 @@ foreach ($facturas as $factura) {
             </button>
         </header>
 
+        <div class="sede-tabs" role="tablist" aria-label="Sede de reposiciones">
+            <button type="button" class="sede-tab active" role="tab" aria-selected="true" data-sede="Pto. Ayora">Pto. Ayora</button>
+            <button type="button" class="sede-tab" role="tab" aria-selected="false" data-sede="Baltra">Baltra</button>
+        </div>
+
         <section class="card table-container">
             <h2>Actuales</h2>
             <table aria-label="Reposiciones actuales" id="reposicionesActualesTable" data-pagination="true">
@@ -108,10 +124,11 @@ foreach ($facturas as $factura) {
                 </thead>
                 <tbody id="reposicionesActualesBody">
                     <?php if (!empty($facturasActuales)): ?>
-                        <?php $contadorActuales = 0; ?>
+                        <?php $contadoresActuales = ['Pto. Ayora' => 0, 'Baltra' => 0]; ?>
                         <?php foreach ($facturasActuales as $factura): ?>
-                            <tr>
-                                <td class="invoice-index"><?= ++$contadorActuales ?></td>
+                            <?php $sedeFactura = $factura['sede'] ?? 'Pto. Ayora'; ?>
+                            <tr data-sede="<?= htmlspecialchars($factura['sede'] ?? 'Pto. Ayora') ?>">
+                                <td class="invoice-index"><?= ++$contadoresActuales[$sedeFactura] ?></td>
                                 <td class="invoice-details">
                                     <span class="invoice-number"><?= htmlspecialchars($factura['numero_factura']) ?></span>
                                     <span class="invoice-date-mobile"><?= htmlspecialchars($factura['fecha']) ?></span>
@@ -158,10 +175,11 @@ foreach ($facturas as $factura) {
                 </thead>
                 <tbody id="reposicionesAnterioresBody">
                     <?php if (!empty($facturasAnteriores)): ?>
-                        <?php $contadorAnteriores = 0; ?>
+                        <?php $contadoresAnteriores = ['Pto. Ayora' => 0, 'Baltra' => 0]; ?>
                         <?php foreach ($facturasAnteriores as $factura): ?>
-                            <tr>
-                                <td class="invoice-index"><?= ++$contadorAnteriores ?></td>
+                            <?php $sedeFactura = $factura['sede'] ?? 'Pto. Ayora'; ?>
+                            <tr data-sede="<?= htmlspecialchars($factura['sede'] ?? 'Pto. Ayora') ?>">
+                                <td class="invoice-index"><?= ++$contadoresAnteriores[$sedeFactura] ?></td>
                                 <td class="invoice-details">
                                     <span class="invoice-number"><?= htmlspecialchars($factura['numero_factura']) ?></span>
                                     <span class="invoice-date-mobile"><?= htmlspecialchars($factura['fecha']) ?></span>

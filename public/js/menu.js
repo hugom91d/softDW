@@ -48,7 +48,14 @@ function refreshTablePagination(tableId) {
     if (!table || table.dataset.pagination !== 'true') return;
 
     const body = table.tBodies[0];
-    const rows = body ? Array.from(body.rows).filter(row => !row.classList.contains('pagination-empty')) : [];
+    const sedeActiva = table.dataset.sedeActiva || '';
+    const rows = body ? Array.from(body.rows).filter(row => {
+        if (row.classList.contains('pagination-empty') || row.classList.contains('sede-empty-state')) {
+            return false;
+        }
+
+        return sedeActiva === '' || row.dataset.sede === sedeActiva;
+    }) : [];
     const pagination = document.getElementById(`${tableId}Pagination`);
     if (!body || !pagination) return;
 
@@ -56,6 +63,12 @@ function refreshTablePagination(tableId) {
     let currentPage = Number.parseInt(table.dataset.page || '1', 10);
     currentPage = Math.min(Math.max(currentPage, 1), pageCount);
     table.dataset.page = String(currentPage);
+
+    Array.from(body.rows).forEach(row => {
+        if (row.dataset.sede && sedeActiva !== '' && row.dataset.sede !== sedeActiva) {
+            row.style.display = 'none';
+        }
+    });
 
     rows.forEach((row, index) => {
         const firstRow = (currentPage - 1) * PAGINATION_PAGE_SIZE;

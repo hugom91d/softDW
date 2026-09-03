@@ -10,6 +10,46 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentNoRepuestoId = null;
     let currentNoRepuestoButton = null;
 
+    function filtrarPorSede(sede) {
+        document.querySelectorAll('#reposicionesActualesTable, #reposicionesAnterioresTable').forEach(table => {
+            table.dataset.sedeActiva = sede;
+            table.dataset.page = '1';
+            const rows = Array.from(table.querySelectorAll('tbody tr[data-sede]'));
+            rows.forEach(row => {
+                row.classList.toggle('sede-hidden', row.dataset.sede !== sede);
+            });
+
+            const hasVisibleRows = rows.some(row => row.dataset.sede === sede);
+            let emptyRow = table.querySelector('.sede-empty-state');
+            if (!hasVisibleRows && rows.length > 0) {
+                if (!emptyRow) {
+                    emptyRow = document.createElement('tr');
+                    emptyRow.className = 'sede-empty-state';
+                    emptyRow.innerHTML = '<td colspan="5" class="empty-state">No hay facturas abiertas para esta sede.</td>';
+                    table.querySelector('tbody').appendChild(emptyRow);
+                }
+            } else if (emptyRow) {
+                emptyRow.remove();
+            }
+
+            refreshTablePagination(table.id);
+        });
+
+        document.querySelectorAll('.sede-tab').forEach(tab => {
+            const activa = tab.dataset.sede === sede;
+            tab.classList.toggle('active', activa);
+            tab.setAttribute('aria-selected', activa ? 'true' : 'false');
+        });
+    }
+
+    document.querySelectorAll('.sede-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            filtrarPorSede(this.dataset.sede);
+        });
+    });
+
+    filtrarPorSede('Pto. Ayora');
+
     if (syncNewInvoicesButton) {
         syncNewInvoicesButton.addEventListener('click', async function() {
             const button = this;
