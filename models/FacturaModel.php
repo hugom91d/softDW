@@ -153,17 +153,20 @@ class FacturaModel
         return $conn;
     }
 
-    private function parseFechaEmision(string $fecha): string
+    private function parseFechaEmision(string $fecha, string $hora = ''): string
     {
         $fecha = trim($fecha);
+        $hora = trim($hora);
 
         if (empty($fecha)) {
             return date('Y-m-d H:i:s');
         }
 
-        $parsed = DateTime::createFromFormat('d/m/Y', $fecha);
+        $parsed = $hora !== ''
+            ? DateTime::createFromFormat('!d/m/Y H:i:s', $fecha . ' ' . $hora)
+            : DateTime::createFromFormat('!d/m/Y', $fecha);
         if ($parsed === false) {
-            $parsed = date_create($fecha);
+            $parsed = date_create($fecha . ($hora !== '' ? ' ' . $hora : ''));
         }
 
         return $parsed ? $parsed->format('Y-m-d H:i:s') : date('Y-m-d H:i:s');
@@ -189,7 +192,7 @@ class FacturaModel
             return 0;
         }
 
-        $fecha = $this->parseFechaEmision($factura['fecha_emision'] ?? '');
+        $fecha = $this->parseFechaEmision($factura['fecha_emision'] ?? '', $factura['hora_emision'] ?? '');
         $estado = 0;
         $idResponsable = 1719893057;
 
