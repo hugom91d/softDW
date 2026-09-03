@@ -42,7 +42,7 @@ class FacturaModel
     {
         $conn = $this->getConnection();
         $stmt = $conn->prepare(
-            "SELECT id_factura, numero_factura, fecha, fecha_cierre, estado, id_responsable, sede
+            "SELECT id_factura, numero_factura, fecha, fecha_cierre, estado, estado_factura, id_responsable, sede
             FROM factura
             WHERE estado = 0
             ORDER BY fecha DESC, id_factura DESC"
@@ -102,7 +102,7 @@ class FacturaModel
 
         $conn = $this->getConnection();
         $fechaCierre = (new DateTime('now', new DateTimeZone('America/Guayaquil')))->format('Y-m-d H:i:s');
-        $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = ?, id_responsable = ? WHERE id_factura = ? AND estado = 0");
+        $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = ?, id_responsable = ? WHERE id_factura = ? AND estado = 0 AND (estado_factura IS NULL OR estado_factura <> 'A')");
         if (!$stmt) {
             return false;
         }
@@ -210,15 +210,16 @@ class FacturaModel
 
         $fecha = $this->parseFechaEmision($factura['fecha_emision'] ?? '', $factura['hora_emision'] ?? '');
         $estado = 0;
+        $estadoFactura = (string) ($factura['estado'] ?? '');
         $idResponsable = 1719893057;
         $sede = str_starts_with($numeroFactura, '002-002') ? 'Baltra' : 'Pto. Ayora';
 
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("INSERT INTO factura (numero_factura, fecha, fecha_cierre, estado, id_responsable, sede) VALUES (?, ?, NULL, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO factura (numero_factura, fecha, fecha_cierre, estado, estado_factura, id_responsable, sede) VALUES (?, ?, NULL, ?, ?, ?, ?)");
         if (!$stmt) {
             return 0;
         }
-        $stmt->bind_param('ssiis', $numeroFactura, $fecha, $estado, $idResponsable, $sede);
+        $stmt->bind_param('ssisis', $numeroFactura, $fecha, $estado, $estadoFactura, $idResponsable, $sede);
         $stmt->execute();
 
         $insertId = $stmt->insert_id;

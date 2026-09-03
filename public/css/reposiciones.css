@@ -189,6 +189,33 @@ table tbody td.acciones {
     display: none;
 }
 
+.invoice-cancelled {
+    display: block;
+    width: fit-content;
+    margin: 0.3rem auto 0;
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-cancelled {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #4b5563;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.status-cancelled-short {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .card.table-container:has(#reposicionesActualesTable),
     .card.table-container:has(#reposicionesAnterioresTable) {
@@ -240,11 +267,26 @@ table tbody td.acciones {
     #reposicionesAnterioresTable th,
     #reposicionesAnterioresTable td {
         padding: 0.75rem 0.35rem;
+        vertical-align: middle;
     }
 
     .invoice-details {
         text-align: left !important;
         overflow-wrap: anywhere;
+    }
+
+    #reposicionesActualesTable td.invoice-status,
+    #reposicionesAnterioresTable td.invoice-status,
+    #reposicionesActualesTable td.acciones,
+    #reposicionesAnterioresTable td.acciones {
+        vertical-align: middle;
+    }
+
+    #reposicionesActualesTable td.acciones,
+    #reposicionesAnterioresTable td.acciones {
+        display: table-cell;
+        text-align: center;
+        white-space: nowrap;
     }
 
     .invoice-number,
@@ -278,6 +320,20 @@ table tbody td.acciones {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .status-cancelled {
+        padding: 0.2rem 0.3rem;
+        font-size: 0.65rem;
+        white-space: nowrap;
+    }
+
+    .status-cancelled-full {
+        display: none;
+    }
+
+    .status-cancelled-short {
+        display: inline;
     }
 
     .acciones {

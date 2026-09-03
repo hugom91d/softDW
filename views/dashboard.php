@@ -44,6 +44,10 @@ foreach ($facturas as $factura) {
 
 $totalActuales = count($facturasActuales);
 $totalAnteriores = count($facturasAnteriores);
+$actualesPtoAyora = count(array_filter($facturasActuales, static fn(array $factura): bool => ($factura['sede'] ?? 'Pto. Ayora') === 'Pto. Ayora'));
+$actualesBaltra = count(array_filter($facturasActuales, static fn(array $factura): bool => ($factura['sede'] ?? '') === 'Baltra'));
+$anterioresPtoAyora = count(array_filter($facturasAnteriores, static fn(array $factura): bool => ($factura['sede'] ?? 'Pto. Ayora') === 'Pto. Ayora'));
+$anterioresBaltra = count(array_filter($facturasAnteriores, static fn(array $factura): bool => ($factura['sede'] ?? '') === 'Baltra'));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -69,46 +73,63 @@ $totalAnteriores = count($facturasAnteriores);
         </header>
 
         <section class="dashboard-grid">
-            <article class="dashboard-card stock-alert-card">
-                <h2><?= $stockBajoPorBodega['uio'] ?></h2>
-                <p>Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?> en UIO.</p>
-                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock UIO</a>
-            </article>
-            <article class="dashboard-card stock-alert-card">
-                <h2><?= $stockBajoPorBodega['baltra'] ?></h2>
-                <p>Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?> en Baltra.</p>
-                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock Baltra</a>
-            </article>
-            <article class="dashboard-card stock-alert-card">
-                <h2><?= $stockBajoPorBodega['ayora'] ?></h2>
-                <p>Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?> en Puerto Ayora.</p>
-                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock Ayora</a>
-            </article>
-            <article class="dashboard-card">
-                <h2><?= $totalActuales ?></h2>
-                <p>Facturas abiertas hoy.</p>
+            <article class="dashboard-card invoice-summary-card">
+                <p class="invoice-summary-title">Facturas abiertas hoy</p>
+                <div class="invoice-sede-counts">
+                    <div>
+                        <span>Pto. Ayora</span>
+                        <strong><?= $actualesPtoAyora ?></strong>
+                    </div>
+                    <div>
+                        <span>Baltra</span>
+                        <strong><?= $actualesBaltra ?></strong>
+                    </div>
+                </div>
                 <a class="btn-card" href="reposiciones.php"><i class="fas fa-rotate"></i> Ver reposiciones</a>
             </article>
-            <article class="dashboard-card">
-                <h2><?= $totalAnteriores ?></h2>
-                <p>Facturas abiertas en días anteriores.</p>
+            <article class="dashboard-card invoice-summary-card">
+                <p class="invoice-summary-title">Facturas abiertas anteriores</p>
+                <div class="invoice-sede-counts">
+                    <div>
+                        <span>Pto. Ayora</span>
+                        <strong><?= $anterioresPtoAyora ?></strong>
+                    </div>
+                    <div>
+                        <span>Baltra</span>
+                        <strong><?= $anterioresBaltra ?></strong>
+                    </div>
+                </div>
                 <a class="btn-card" href="reposiciones.php"><i class="fas fa-clock"></i> Revisar facturas</a>
             </article>
-            <article class="dashboard-card">
-                <h2>Facturas</h2>
-                <p>Consulta todas las facturas disponibles y trabaja con ellas desde aquí.</p>
-                <a class="btn-card" href="facturas.php"><i class="fas fa-file-invoice"></i> Ver facturas</a>
+            <article class="dashboard-card stock-alert-card stock-summary-card">
+                <p class="invoice-summary-title">Productos con stock menor a <?= number_format($configuracionStock['limite_critico'], 0) ?></p>
+                <div class="stock-bodega-counts">
+                    <div>
+                        <span>UIO</span>
+                        <strong><?= $stockBajoPorBodega['uio'] ?></strong>
+                    </div>
+                    <div>
+                        <span>Baltra</span>
+                        <strong><?= $stockBajoPorBodega['baltra'] ?></strong>
+                    </div>
+                    <div>
+                        <span>Pto. Ayora</span>
+                        <strong><?= $stockBajoPorBodega['ayora'] ?></strong>
+                    </div>
+                </div>
+                <a class="btn-card" href="stock.php"><i class="fas fa-warehouse"></i> Ver stock</a>
             </article>
         </section>
 
         <section class="dashboard-section dashboard-invoices">
-            <h2>Últimas facturas abiertas</h2>
+            <h2>Últimas facturas</h2>
             <table class="dashboard-table" id="dashboardInvoicesTable" data-pagination="true">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Número de factura</th>
                         <th>Fecha</th>
+                        <th>Sede</th>
                         <th>Estado</th>
                     </tr>
                 </thead>
@@ -121,12 +142,21 @@ $totalAnteriores = count($facturasAnteriores);
                                 <td><?= ++$count ?></td>
                                 <td><?= htmlspecialchars($factura['numero_factura'] ?? $factura['documento'] ?? '-') ?></td>
                                 <td><?= htmlspecialchars($factura['fecha']) ?></td>
-                                <td class="status"><?= $factura['estado'] == 0 ? 'Abierta' : ($factura['estado'] == 1 ? 'Repuesto' : 'No repuesto') ?></td>
+                                <td><?= htmlspecialchars($factura['sede'] ?? 'Pto. Ayora') ?></td>
+                                <td class="status">
+                                    <?php if (($factura['estado_factura'] ?? '') === 'A'): ?>
+                                        <span class="invoice-status-badge cancelled">Anulada</span>
+                                    <?php elseif (($factura['estado_factura'] ?? '') === 'C'): ?>
+                                        <span class="invoice-status-badge invoiced">Facturada</span>
+                                    <?php else: ?>
+                                        <span class="invoice-status-badge pending">Sin estado</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="4">No hay facturas abiertas para mostrar.</td>
+                            <td colspan="5">No hay facturas abiertas para mostrar.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

@@ -6,24 +6,29 @@
 
     #facturasTable th:nth-child(1),
     #facturasTable td:nth-child(1),
-    #facturasTable th:nth-child(4),
-    #facturasTable td:nth-child(4) {
+    #facturasTable th:nth-child(5),
+    #facturasTable td:nth-child(5) {
         display: none;
     }
 
     #facturasTable th:nth-child(2),
     #facturasTable td:nth-child(2) {
-        width: 37%;
+        width: 32%;
     }
 
     #facturasTable th:nth-child(3),
     #facturasTable td:nth-child(3) {
-        width: 48%;
+        width: 20%;
     }
 
-    #facturasTable th:nth-child(5),
-    #facturasTable td:nth-child(5) {
-        width: 15%;
+    #facturasTable th:nth-child(4),
+    #facturasTable td:nth-child(4) {
+        width: 35%;
+    }
+
+    #facturasTable th:nth-child(6),
+    #facturasTable td:nth-child(6) {
+        width: 13%;
     }
 
     #facturasTable td:nth-child(2) {
@@ -41,7 +46,7 @@
         overflow: hidden;
     }
 
-    #facturasTable td:nth-child(3) {
+    #facturasTable td:nth-child(4) {
         white-space: normal;
         overflow-wrap: anywhere;
         line-height: 1.25;
@@ -60,8 +65,8 @@
         justify-content: center;
     }
 
-    #facturasTable th:nth-child(4),
-    #facturasTable td:nth-child(4) {
+    #facturasTable th:nth-child(5),
+    #facturasTable td:nth-child(5) {
         text-align: left;
     }
 
@@ -74,6 +79,6 @@
     display: none;
 }
 
-#facturasTable th:nth-child(4) {
+#facturasTable th:nth-child(5) {
     text-align: left;
 }

@@ -52,6 +52,7 @@ if (($_SESSION['rol'] ?? '') === 'operador') {
                     <tr>
                         <th>#</th>
                         <th>Número<span class="mobile-header-break"><br></span> Factura</th>
+                        <th>Sede</th>
                         <th>Cliente</th>
                         <th>Total</th>
                         <th>Acción</th>
@@ -61,29 +62,23 @@ if (($_SESSION['rol'] ?? '') === 'operador') {
                     <?php if (!empty($facturas)): ?>
                         <?php $contador = 0; ?>
                         <?php foreach ($facturas as $factura): ?>
-                            <?php if (strpos($factura['documento'], '002-002') === false) { ?>
-                                <tr>
-                                    <td><?= ++$contador ?></td>
-                                    <td><span class="invoice-number"><?= htmlspecialchars($factura['documento'] ?? '-') ?></span></td>
-                                    <td><?= $factura['cliente']['nombre_comercial'] ?></td>
-                                    <td class="currency-cell"><span class="currency-symbol">$</span><span class="currency-value"><?= number_format((float)($factura['total'] ?? 0), 2, '.', ',') ?></span></td>
-                                    <td class="acciones">
-                                        <!-- <button type="button" class="btn-ver" data-id="<?= $factura['id'] ?>" title="Ver detalle">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
-                                        <button type="button" class="btn-finalizar" data-id="<?= $factura['id'] ?>" title="Finalizar">
-                                            <i class="fa-solid fa-check"></i>
-                                        </button> -->
-                                        <a href="<?= $factura['url_ride'] ?>" class="btn-pdf" target="_blank" download title="Descargar PDF">
-                                            <i class="fa-solid fa-file-pdf"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php } ?>
+                            <?php $numeroFactura = (string)($factura['documento'] ?? ''); ?>
+                            <tr>
+                                <td><?= ++$contador ?></td>
+                                <td><span class="invoice-number"><?= htmlspecialchars($numeroFactura ?: '-') ?></span></td>
+                                <td><?= str_starts_with($numeroFactura, '002-002') ? 'Baltra' : 'Pto. Ayora' ?></td>
+                                <td><?= htmlspecialchars($factura['cliente']['nombre_comercial'] ?? '-') ?></td>
+                                <td class="currency-cell"><span class="currency-symbol">$</span><span class="currency-value"><?= number_format((float)($factura['total'] ?? 0), 2, '.', ',') ?></span></td>
+                                <td class="acciones">
+                                    <a href="<?= htmlspecialchars($factura['url_ride'] ?? '#') ?>" class="btn-pdf" target="_blank" download title="Descargar PDF">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </a>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="empty-state">
+                            <td colspan="6" class="empty-state">
                                 No se encontraron facturas.
                             </td>
                         </tr>

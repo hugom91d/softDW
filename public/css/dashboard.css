@@ -25,6 +25,8 @@
     border: 1px solid #e5e7eb;
     min-height: 170px;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .dashboard-card h2 {
@@ -47,13 +49,93 @@
     line-height: 1.5;
 }
 
+.invoice-summary-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.invoice-summary-title {
+    margin: 0 0 0.85rem !important;
+    font-weight: 700;
+}
+
+.invoice-sede-counts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1.25rem;
+}
+
+.invoice-sede-counts > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0 1rem;
+}
+
+.invoice-sede-counts > div + div {
+    border-left: 1px solid #dbe1e8;
+}
+
+.invoice-sede-counts > div:first-child {
+    padding-left: 0;
+}
+
+.invoice-sede-counts span {
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.invoice-sede-counts strong {
+    color: #0f172a;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.stock-bodega-counts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 1.25rem;
+}
+
+.stock-bodega-counts > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0 1rem;
+}
+
+.stock-bodega-counts > div + div {
+    border-left: 1px solid #fed7aa;
+}
+
+.stock-bodega-counts > div:first-child {
+    padding-left: 0;
+}
+
+.stock-bodega-counts span {
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.stock-bodega-counts strong {
+    color: #c2410c;
+    font-size: 2rem;
+    line-height: 1;
+}
+
 .dashboard-card .btn-card {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     background: #0d6efd;
     color: #ffffff;
-    padding: 0.75rem 1rem;
+    width: fit-content;
+    min-height: 42px;
+    margin-top: auto;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.6rem 1rem;
     border-radius: 999px;
     border: none;
     text-decoration: none;
@@ -101,6 +183,33 @@
 .dashboard-table td.status {
     font-weight: 700;
     color: #0f172a;
+}
+
+.invoice-status-badge {
+    display: inline-block;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.invoice-status-badge.cancelled {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.invoice-status-badge.invoiced {
+    background: #dcfce7;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.invoice-status-badge.pending {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+    color: #4b5563;
 }
 
 @media (max-width: 768px) {

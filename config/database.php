@@ -26,6 +26,11 @@ if ($resultado && $resultado->num_rows === 0) {
 }
 $conn->query("UPDATE factura SET sede = CASE WHEN numero_factura LIKE '002-002%' THEN 'Baltra' ELSE 'Pto. Ayora' END WHERE sede IS NULL OR sede = '' OR sede = 'Pto. Ayora'");
 
+$resultado = $conn->query("SHOW COLUMNS FROM factura LIKE 'estado_factura'");
+if ($resultado && $resultado->num_rows === 0) {
+    $conn->query("ALTER TABLE factura ADD COLUMN estado_factura CHAR(1) NULL AFTER estado");
+}
+
 $resultado = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'DebeCambiarContrasena'");
 if ($resultado && $resultado->num_rows === 0) {
     $conn->query("ALTER TABLE usuarios ADD COLUMN DebeCambiarContrasena TINYINT(1) NOT NULL DEFAULT 1 AFTER Contrasena");

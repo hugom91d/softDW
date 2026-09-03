@@ -127,10 +127,12 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
                         <?php $contadoresActuales = ['Pto. Ayora' => 0, 'Baltra' => 0]; ?>
                         <?php foreach ($facturasActuales as $factura): ?>
                             <?php $sedeFactura = $factura['sede'] ?? 'Pto. Ayora'; ?>
+                            <?php $facturaAnulada = ($factura['estado_factura'] ?? '') === 'A'; ?>
                             <tr data-sede="<?= htmlspecialchars($factura['sede'] ?? 'Pto. Ayora') ?>">
                                 <td class="invoice-index"><?= ++$contadoresActuales[$sedeFactura] ?></td>
                                 <td class="invoice-details">
                                     <span class="invoice-number"><?= htmlspecialchars($factura['numero_factura']) ?></span>
+                                    <?php if ($facturaAnulada): ?><span class="invoice-cancelled">Anulada</span><?php endif; ?>
                                     <span class="invoice-date-mobile"><?= htmlspecialchars($factura['fecha']) ?></span>
                                 </td>
                                 <td class="invoice-date"><?= htmlspecialchars($factura['fecha']) ?></td>
@@ -140,12 +142,18 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
                                 // Para facturas actuales mostramos estado en verde pastel
                                 $statusClass = 'status-actual';
                                 ?>
-                                <td class="invoice-status"><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
+                                <td class="invoice-status">
+                                    <?php if ($facturaAnulada): ?>
+                                        <span class="status-cancelled"><span class="status-cancelled-full">No procesar</span><span class="status-cancelled-short">N/A</span></span>
+                                    <?php else: ?>
+                                        <span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="acciones">
-                                    <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
+                                    <button type="button" class="btn-ver<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Ver detalle' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cerrar" data-id="<?= $factura['id_factura'] ?>" title="Cerrar factura">
+                                    <button type="button" class="btn-cerrar<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Cerrar factura' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
                                         <i class="fa-solid fa-check"></i>
                                     </button>
                                 </td>
@@ -178,10 +186,12 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
                         <?php $contadoresAnteriores = ['Pto. Ayora' => 0, 'Baltra' => 0]; ?>
                         <?php foreach ($facturasAnteriores as $factura): ?>
                             <?php $sedeFactura = $factura['sede'] ?? 'Pto. Ayora'; ?>
+                            <?php $facturaAnulada = ($factura['estado_factura'] ?? '') === 'A'; ?>
                             <tr data-sede="<?= htmlspecialchars($factura['sede'] ?? 'Pto. Ayora') ?>">
                                 <td class="invoice-index"><?= ++$contadoresAnteriores[$sedeFactura] ?></td>
                                 <td class="invoice-details">
                                     <span class="invoice-number"><?= htmlspecialchars($factura['numero_factura']) ?></span>
+                                    <?php if ($facturaAnulada): ?><span class="invoice-cancelled">Anulada</span><?php endif; ?>
                                     <span class="invoice-date-mobile"><?= htmlspecialchars($factura['fecha']) ?></span>
                                 </td>
                                 <td class="invoice-date"><?= htmlspecialchars($factura['fecha']) ?></td>
@@ -191,12 +201,18 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
                                 // Para facturas en fechas anteriores mostramos estado en rojo pastel
                                 $statusClass = 'status-anterior';
                                 ?>
-                                <td class="invoice-status"><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
+                                <td class="invoice-status">
+                                    <?php if ($facturaAnulada): ?>
+                                        <span class="status-cancelled"><span class="status-cancelled-full">No procesar</span><span class="status-cancelled-short">N/A</span></span>
+                                    <?php else: ?>
+                                        <span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="acciones">
-                                    <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
+                                    <button type="button" class="btn-ver<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Ver detalle' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cerrar" data-id="<?= $factura['id_factura'] ?>" title="Cerrar factura">
+                                    <button type="button" class="btn-cerrar<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Cerrar factura' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
                                         <i class="fa-solid fa-check"></i>
                                     </button>
                                 </td>

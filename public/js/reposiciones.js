@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-ver').forEach(button => {
         button.addEventListener('click', function() {
             const idFactura = this.dataset.id;
-            if (!idFactura) {
+            if (!idFactura || this.disabled) {
                 return;
             }
 
