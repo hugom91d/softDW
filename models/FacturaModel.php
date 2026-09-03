@@ -78,7 +78,7 @@ class FacturaModel
         return $hasOpen;
     }
 
-    public function cerrarFactura(int $idFactura): bool
+    public function cerrarFactura(int $idFactura, string $idResponsable): bool
     {
         if ($this->facturaTieneDetallesAbiertos($idFactura)) {
             return false;
@@ -86,12 +86,12 @@ class FacturaModel
 
         $conn = $this->getConnection();
         $fechaCierre = (new DateTime('now', new DateTimeZone('America/Guayaquil')))->format('Y-m-d H:i:s');
-        $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = ? WHERE id_factura = ? AND estado = 0");
+        $stmt = $conn->prepare("UPDATE factura SET estado = 1, fecha_cierre = ?, id_responsable = ? WHERE id_factura = ? AND estado = 0");
         if (!$stmt) {
             return false;
         }
 
-        $stmt->bind_param('si', $fechaCierre, $idFactura);
+        $stmt->bind_param('ssi', $fechaCierre, $idResponsable, $idFactura);
         $success = $stmt->execute();
         $affected = $stmt->affected_rows;
         $stmt->close();

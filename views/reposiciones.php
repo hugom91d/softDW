@@ -24,7 +24,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'detalle' && isset($_GET['id_f
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'cerrar' && isset($_POST['id_factura'])) {
         $idFactura = intval($_POST['id_factura']);
-        $success = $model->cerrarFactura($idFactura);
+        $idResponsable = (string) $_SESSION['cedula'];
+        $success = $model->cerrarFactura($idFactura, $idResponsable);
         $message = $success ? 'Factura cerrada correctamente.' : 'No se puede cerrar la factura porque hay detalles abiertos.';
         header('Content-Type: application/json');
         echo json_encode(['success' => $success, 'message' => $message], JSON_PRETTY_PRINT);

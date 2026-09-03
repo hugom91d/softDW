@@ -16,6 +16,32 @@ class UsuarioModel
         return is_array($usuarios) ? $usuarios : [];
     }
 
+    public function listarPaginado(int $pagina, int $porPagina, string $rol = ''): array
+    {
+        $conn = $this->getConnection();
+        $pagina = max(1, $pagina);
+        $porPagina = max(1, $porPagina);
+        $offset = ($pagina - 1) * $porPagina;
+        $filtroRol = in_array($rol, ['admin', 'operador'], true) ? $rol : '';
+        $where = $filtroRol !== ''
+            ? " WHERE LOWER(TRIM(Rol)) = '" . $conn->real_escape_string($filtroRol) . "'"
+            : '';
+
+        $totalResult = $conn->query('SELECT COUNT(*) AS total FROM usuarios' . $where);
+        $total = $totalResult ? (int) ($totalResult->fetch_assoc()['total'] ?? 0) : 0;
+        $result = $conn->query(
+            'SELECT Cedula, Nombre, Rol, Estado FROM usuarios' . $where
+            . ' ORDER BY Nombre ASC LIMIT ' . $porPagina . ' OFFSET ' . $offset
+        );
+        $usuarios = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+        return [
+            'items' => is_array($usuarios) ? $usuarios : [],
+            'total' => $total,
+            'total_paginas' => (int) ceil($total / $porPagina),
+        ];
+    }
+
     public function buscarPorCedula(string $cedula): ?array
     {
         $conn = $this->getConnection();

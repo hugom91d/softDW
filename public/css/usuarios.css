@@ -15,6 +15,51 @@
     color: #991b1b;
 }
 
+.page.usuarios-page {
+    min-height: auto;
+}
+
+#usuarios-listado {
+    position: relative;
+}
+
+#usuarios-listado.is-loading {
+    pointer-events: none;
+}
+
+#usuarios-listado.is-loading::before {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    background: rgba(255, 255, 255, 0.78);
+    content: '';
+}
+
+#usuarios-listado.is-loading::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem;
+    border: 3px solid #dbeafe;
+    border-top-color: #0d6efd;
+    border-radius: 50%;
+    content: '';
+    animation: usuarios-spinner 0.8s linear infinite;
+}
+
+@keyframes usuarios-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .usuarios-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -23,6 +68,74 @@
 
 .usuarios-field.full-width {
     grid-column: 1 / -1;
+}
+
+.usuarios-create-actions {
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.usuarios-create-actions button {
+    width: auto;
+    padding-inline: 1.5rem;
+}
+
+.usuarios-table-meta {
+    margin-bottom: 10px;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.usuarios-role-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #dbe2ea;
+}
+
+.usuarios-role-tabs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 3px solid transparent;
+    color: #475569;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.usuarios-role-tabs a:hover,
+.usuarios-role-tabs a.active {
+    color: #0d6efd;
+}
+
+.usuarios-role-tabs a.active {
+    border-bottom-color: #0d6efd;
+}
+
+.usuarios-table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+
+.usuarios-table-pagination .pagination-button {
+    width: auto;
+    min-width: 92px;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+
+.usuarios-table-pagination .pagination-status {
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
 }
 
 .badge {
@@ -182,6 +295,12 @@
 }
 
 @media (max-width: 600px) {
+    .usuarios-role-tabs a {
+        flex: 1;
+        justify-content: center;
+        padding-inline: 0.5rem;
+    }
+
     .usuarios-grid {
         grid-template-columns: 1fr;
     }

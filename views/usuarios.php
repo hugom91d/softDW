@@ -121,7 +121,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$usuarios = $model->listar();
+$porPagina = 5;
+$rolActivo = in_array($_GET['rol'] ?? '', ['admin', 'operador'], true) ? $_GET['rol'] : 'admin';
+$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$resultadoUsuarios = $model->listarPaginado($pagina, $porPagina, $rolActivo);
+$usuarios = $resultadoUsuarios['items'];
+$totalUsuarios = $resultadoUsuarios['total'];
+$totalPaginas = $resultadoUsuarios['total_paginas'];
+$desdeUsuario = $totalUsuarios > 0 ? (($pagina - 1) * $porPagina) + 1 : 0;
+$hastaUsuario = min($pagina * $porPagina, $totalUsuarios);
 $configuracionActiva = 'usuarios';
 ?>
 <!DOCTYPE html>
@@ -142,7 +150,7 @@ $configuracionActiva = 'usuarios';
 
 <body>
     <?php require_once __DIR__ . '/layouts/menu.php'; ?>
-    <div class="page">
+    <div class="page usuarios-page">
         <header>
             <h1>Configuración</h1>
             <p class="subtitle">Crea y gestiona los accesos al sistema.</p>
@@ -174,33 +182,44 @@ $configuracionActiva = 'usuarios';
                     </div>
 
                     <div class="usuarios-field">
+                        <label for="contrasena">Contraseña</label>
+                        <input type="password" id="contrasena" name="contrasena" autocomplete="new-password" required>
+                    </div>
+
+                    <div class="usuarios-field">
+                        <label for="confirmacion_contrasena">Confirmar contraseña</label>
+                        <input type="password" id="confirmacion_contrasena" name="confirmacion_contrasena" autocomplete="new-password" required>
+                    </div>
+
+                    <div class="usuarios-field">
                         <label for="rol">Rol</label>
                         <select id="rol" name="rol" required>
                             <option value="operador">Operador</option>
                             <option value="admin">Administrador</option>
                         </select>
                     </div>
-
-                    <div class="usuarios-field">
-                        <label for="contrasena">Contraseña</label>
-                        <input type="password" id="contrasena" name="contrasena" autocomplete="new-password" required>
-                    </div>
-
-                    <div class="usuarios-field full-width">
-                        <label for="confirmacion_contrasena">Confirmar contraseña</label>
-                        <input type="password" id="confirmacion_contrasena" name="confirmacion_contrasena" autocomplete="new-password" required>
-                    </div>
                 </div>
 
-                <div class="button-group">
+                <div class="button-group usuarios-create-actions">
                     <button type="submit">Crear usuario</button>
                 </div>
             </form>
         </section>
 
-        <section class="card">
+        <section class="card" id="usuarios-listado">
             <h2 class="profile-section-title" style="margin-top:0;">Usuarios registrados</h2>
+            <nav class="usuarios-role-tabs" aria-label="Filtrar usuarios por rol">
+                <a class="<?= $rolActivo === 'admin' ? 'active' : '' ?>" href="usuarios.php?rol=admin">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </a>
+                <a class="<?= $rolActivo === 'operador' ? 'active' : '' ?>" href="usuarios.php?rol=operador">
+                    <i class="fas fa-user"></i> Operadores
+                </a>
+            </nav>
             <div class="table-container">
+                <div class="usuarios-table-meta">
+                    <?= $totalUsuarios > 0 ? 'Mostrando ' . $desdeUsuario . ' - ' . $hastaUsuario . ' de ' . $totalUsuarios . ' usuarios' : 'No hay usuarios' ?>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -256,6 +275,15 @@ $configuracionActiva = 'usuarios';
                         <?php endif; ?>
                     </tbody>
                 </table>
+
+                <?php if ($totalPaginas > 1): ?>
+                    <form method="GET" class="table-pagination usuarios-table-pagination" aria-label="Paginación de usuarios">
+                        <input type="hidden" name="rol" value="<?= htmlspecialchars($rolActivo) ?>">
+                        <button type="submit" name="pagina" value="<?= $pagina - 1 ?>" class="pagination-button" <?= $pagina === 1 ? 'disabled' : '' ?>>Anterior</button>
+                        <span class="pagination-status">Página <?= $pagina ?> de <?= $totalPaginas ?></span>
+                        <button type="submit" name="pagina" value="<?= $pagina + 1 ?>" class="pagination-button" <?= $pagina === $totalPaginas ? 'disabled' : '' ?>>Siguiente</button>
+                    </form>
+                <?php endif; ?>
             </div>
         </section>
     </div>
@@ -311,7 +339,7 @@ $configuracionActiva = 'usuarios';
     </div>
 
     <script src="../public/js/menu.js"></script>
-    <script src="../public/js/usuarios.js"></script>
+    <script src="../public/js/usuarios.js?v=2"></script>
 </body>
 
 </html>
