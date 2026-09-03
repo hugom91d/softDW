@@ -1,9 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../config/session.php';
 if (!isset($_SESSION['cedula'])) {
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 
@@ -113,16 +111,19 @@ foreach ($facturas as $factura) {
                         <?php $contadorActuales = 0; ?>
                         <?php foreach ($facturasActuales as $factura): ?>
                             <tr>
-                                <td><?= ++$contadorActuales ?></td>
-                                <td><?= htmlspecialchars($factura['numero_factura']) ?></td>
-                                <td><?= htmlspecialchars($factura['fecha']) ?></td>
+                                <td class="invoice-index"><?= ++$contadorActuales ?></td>
+                                <td class="invoice-details">
+                                    <span class="invoice-number"><?= htmlspecialchars($factura['numero_factura']) ?></span>
+                                    <span class="invoice-date-mobile"><?= htmlspecialchars($factura['fecha']) ?></span>
+                                </td>
+                                <td class="invoice-date"><?= htmlspecialchars($factura['fecha']) ?></td>
                                 <?php
                                 $fechaFactura = new DateTime($factura['fecha']);
                                 $diasAbierta = (new DateTime())->diff($fechaFactura)->days;
                                 // Para facturas actuales mostramos estado en verde pastel
                                 $statusClass = 'status-actual';
                                 ?>
-                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span></span></td>
+                                <td class="invoice-status"><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
@@ -160,16 +161,19 @@ foreach ($facturas as $factura) {
                         <?php $contadorAnteriores = 0; ?>
                         <?php foreach ($facturasAnteriores as $factura): ?>
                             <tr>
-                                <td><?= ++$contadorAnteriores ?></td>
-                                <td><?= htmlspecialchars($factura['numero_factura']) ?></td>
-                                <td><?= htmlspecialchars($factura['fecha']) ?></td>
+                                <td class="invoice-index"><?= ++$contadorAnteriores ?></td>
+                                <td class="invoice-details">
+                                    <span class="invoice-number"><?= htmlspecialchars($factura['numero_factura']) ?></span>
+                                    <span class="invoice-date-mobile"><?= htmlspecialchars($factura['fecha']) ?></span>
+                                </td>
+                                <td class="invoice-date"><?= htmlspecialchars($factura['fecha']) ?></td>
                                 <?php
                                 $fechaFactura = new DateTime($factura['fecha']);
                                 $diasAbierta = (new DateTime())->diff($fechaFactura)->days;
                                 // Para facturas en fechas anteriores mostramos estado en rojo pastel
                                 $statusClass = 'status-anterior';
                                 ?>
-                                <td><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span></span></td>
+                                <td class="invoice-status"><span class="<?= $statusClass ?>"><span class="status-full"><?= (int)($factura['estado'] ?? 0) === 0 ? 'Abierta' : 'Cerrada' ?></span><span class="status-short"><?= (int)($factura['estado'] ?? 0) === 0 ? 'A' : 'C' ?></span></span></td>
                                 <td class="acciones">
                                     <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
@@ -206,7 +210,7 @@ foreach ($facturas as $factura) {
                                 <th>#</th>
                                 <th>Prenda</th>
                                 <th>Cantidad</th>
-                                <th>Descripción</th>
+                                <th>Nombre</th>
                                 <th>Estado</th>
                                 <th>Repuesto</th>
                             </tr>

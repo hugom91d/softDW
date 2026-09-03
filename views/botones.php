@@ -1,7 +1,7 @@
 <?php
-session_start();
+require_once __DIR__ . '/../config/session.php';
 if (!isset($_SESSION['cedula'])) {
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 ?>

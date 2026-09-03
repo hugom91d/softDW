@@ -5,4 +5,4 @@
     Require ip 192.168.100.100
 </RequireAny>
 
-ErrorDocument 403 /acceso-denegado.php
+ErrorDocument 403 /acceso-denegado.php  

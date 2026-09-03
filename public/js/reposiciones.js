@@ -253,7 +253,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     detalleBody.innerHTML = detalles.length > 0 ? detalles.map((detalle, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td data-label="Prenda">${detalle.codigo_interno ?? '-'}</td>
+                            <td data-label="Prenda">
+                                <span class="detail-code">${detalle.codigo_interno ?? '-'}</span>
+                                <span class="detail-quantity-mobile">Cantidad: ${detalle.cantidad ?? '-'}</span>
+                            </td>
                             <td data-label="Cantidad">${detalle.cantidad ?? '-'}</td>
                             <td data-label="Descripción">${detalle.descripcion ?? '-'}</td>
                             <td>${detalle.estado == 0 ? 'Abierto' : (detalle.estado == 1 ? 'Repuesto' : 'No repuesto')}</td>

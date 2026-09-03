@@ -1,9 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../config/session.php';
 if (!isset($_SESSION['cedula'])) {
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 if (($_SESSION['rol'] ?? '') !== 'admin') {

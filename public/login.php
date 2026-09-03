@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../config/session.php';
 $error = isset($_GET['error']) && $_GET['error'] === '1';
 $forceChange = isset($_GET['force_change']) && $_GET['force_change'] === '1' && !empty($_SESSION['cedula']) && !empty($_SESSION['fuerza_cambio_password']);
 $resetError = $_SESSION['reset_error'] ?? '';

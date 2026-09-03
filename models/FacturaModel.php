@@ -19,7 +19,23 @@ class FacturaModel
             return [];
         }
 
-        return $resultado['data']['results'] ?? [];
+        $facturas = $resultado['data']['results'] ?? [];
+        if (!is_array($facturas)) {
+            return [];
+        }
+
+        usort($facturas, static function (array $facturaA, array $facturaB): int {
+            $fechaA = strtotime(trim((string) ($facturaA['fecha_emision'] ?? '')) . ' ' . trim((string) ($facturaA['hora_emision'] ?? ''))) ?: 0;
+            $fechaB = strtotime(trim((string) ($facturaB['fecha_emision'] ?? '')) . ' ' . trim((string) ($facturaB['hora_emision'] ?? ''))) ?: 0;
+
+            if ($fechaA === $fechaB) {
+                return (int) ($facturaB['id'] ?? 0) <=> (int) ($facturaA['id'] ?? 0);
+            }
+
+            return $fechaB <=> $fechaA;
+        });
+
+        return $facturas;
     }
 
     public function getFacturasAbiertasHoy(): array
@@ -29,7 +45,7 @@ class FacturaModel
             "SELECT id_factura, numero_factura, fecha, fecha_cierre, estado, id_responsable
             FROM factura
             WHERE estado = 0
-            ORDER BY fecha ASC"
+            ORDER BY fecha DESC, id_factura DESC"
         );
 
         if (!$stmt) {
