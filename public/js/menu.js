@@ -43,6 +43,103 @@ function formatCurrency(value) {
     return `<span class="currency-symbol">$</span><span class="currency-value">${formatted}</span>`;
 }
 
+function playSyncAlert(message = 'Hay facturas nuevas sincronizadas.') {
+    try {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtor) {
+            const audioContext = new AudioCtor();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'triangle';
+            oscillator.frequency.value = 880;
+            gainNode.gain.value = 0.08;
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+                audioContext.close();
+            }, 350);
+        }
+    } catch (error) {
+        // Ignorar si el navegador no permite audio programático.
+    }
+
+    if ('vibrate' in navigator) {
+        navigator.vibrate([180, 80, 180]);
+    }
+
+    if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+            new Notification('Nuevas facturas sincronizadas', {
+                body: message,
+                icon: 'https://darwinandwolf.com/wp-content/uploads/2025/12/Fav-50x50.png'
+            });
+        } else if (Notification.permission === 'default') {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    new Notification('Nuevas facturas sincronizadas', {
+                        body: message,
+                        icon: 'https://darwinandwolf.com/wp-content/uploads/2025/12/Fav-50x50.png'
+                    });
+                }
+            }).catch(() => {
+                // Ignorar si el navegador bloquea la solicitud.
+            });
+        }
+    }
+
+    const notificationElement = document.getElementById('systemNotification');
+    const notificationMessage = document.getElementById('systemNotificationMessage');
+    if (notificationElement && notificationMessage) {
+        notificationMessage.textContent = message;
+        notificationElement.classList.add('show');
+        const acceptButton = document.getElementById('systemNotificationAccept');
+        if (acceptButton) {
+            acceptButton.focus();
+        }
+    }
+
+    const originalTitle = document.title;
+    const titleInterval = setInterval(() => {
+        document.title = document.title === originalTitle ? '¡Nuevas facturas!' : originalTitle;
+    }, 700);
+
+    setTimeout(() => {
+        clearInterval(titleInterval);
+        document.title = originalTitle;
+    }, 4000);
+}
+
+window.playSyncAlert = playSyncAlert;
+
+function monitorAutomaticSyncNotifications() {
+    const checkNotification = () => {
+        fetch('../public/index.php?controller=factura&action=notificacionSincronizacion', {
+            credentials: 'same-origin',
+            cache: 'no-store'
+        })
+            .then(response => response.ok ? response.json() : null)
+            .then(notification => {
+                const insertedCount = Number(notification?.inserted_count ?? 0);
+                if (insertedCount > 0) {
+                    playSyncAlert(`Se sincronizaron ${insertedCount} facturas nuevas automáticamente.`);
+                }
+            })
+            .catch(() => {
+                // El siguiente sondeo reintentará la consulta.
+            });
+    };
+
+    checkNotification();
+    window.setInterval(checkNotification, 15000);
+}
+
+document.addEventListener('DOMContentLoaded', monitorAutomaticSyncNotifications);
+
 function refreshTablePagination(tableId) {
     const table = document.getElementById(tableId);
     if (!table || table.dataset.pagination !== 'true') return;
@@ -213,6 +310,9 @@ function initSyncOverlay() {
             apiResult = Array.isArray(data.facturas) ? data.facturas : [];
             if (data.inserted_count !== undefined) {
                 syncStatus.textContent = `Sincronización completada. ${data.inserted_count} facturas guardadas.`;
+                if (Number(data.inserted_count) > 0) {
+                    window.playSyncAlert?.(`Se sincronizaron ${data.inserted_count} facturas nuevas.`);
+                }
             }
             fetchCompleted = true;
         })

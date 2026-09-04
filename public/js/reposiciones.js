@@ -67,7 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const insertedCount = Number(data.inserted_count ?? 0);
 
                 if (insertedCount > 0) {
-                    showSystemNotification(`Sincronización completada. ${insertedCount} facturas guardadas.`);
+                    const message = `Sincronización completada. ${insertedCount} facturas guardadas.`;
+                    showSystemNotification(message);
+                    window.playSyncAlert?.(message);
                     setTimeout(() => {
                         window.location.reload();
                     }, 1200);

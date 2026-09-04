@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../services/FacturaApi.php';
 
 class FacturaModel
@@ -201,17 +202,35 @@ class FacturaModel
         return $exists;
     }
 
-    private function insertarFacturaLocal(array $factura): int
+    private function obtenerIdResponsableActual(): int
+    {
+        $valor = $_SESSION['cedula'] ?? $_SESSION['id_usuario'] ?? $_SESSION['user_id'] ?? $_SESSION['id'] ?? '';
+
+        if (is_numeric($valor)) {
+            return (int) $valor;
+        }
+
+        if (is_string($valor) && preg_match('/^\d+$/', trim($valor)) === 1) {
+            return (int) trim($valor);
+        }
+
+        return 0;
+    }
+
+    private function insertarFacturaLocal(array $factura, int $idResponsable): int
     {
         $numeroFactura = $factura['documento'] ?? '';
         if (empty($numeroFactura) || $this->facturaExiste($numeroFactura)) {
             return 0;
         }
 
+        if ($idResponsable <= 0) {
+            return 0;
+        }
+
         $fecha = $this->parseFechaEmision($factura['fecha_emision'] ?? '', $factura['hora_emision'] ?? '');
         $estado = 0;
         $estadoFactura = (string) ($factura['estado'] ?? '');
-        $idResponsable = 1719893057;
         $sede = str_starts_with($numeroFactura, '002-002') ? 'Baltra' : 'Pto. Ayora';
 
         $conn = $this->getConnection();
@@ -283,7 +302,7 @@ class FacturaModel
         return $success;
     }
 
-    public function guardarFacturasHoy(): array
+    public function guardarFacturasHoy(?int $idResponsable = null): array
     {
         $fechaHoy = date('d/m/Y');
         $filtros = [
@@ -292,11 +311,20 @@ class FacturaModel
             'tipo' => 'FAC',
         ];
 
+        if ($idResponsable === null || $idResponsable <= 0) {
+            $idResponsable = $this->obtenerIdResponsableActual();
+        }
+
         $facturas = $this->listar($filtros);
         $inserted = [];
 
         foreach ($facturas as $factura) {
-            $idFactura = $this->insertarFacturaLocal($factura);
+            $numeroFactura = (string) ($factura['documento'] ?? '');
+            if ($numeroFactura === '') {
+                continue;
+            }
+
+            $idFactura = $this->insertarFacturaLocal($factura, $idResponsable);
             if ($idFactura <= 0) {
                 continue;
             }
@@ -307,12 +335,88 @@ class FacturaModel
                 }
             }
 
-            $inserted[] = $factura;
+            $inserted[] = [
+                'documento' => $numeroFactura,
+                'fecha' => $factura['fecha_emision'] ?? '',
+                'hora' => $factura['hora_emision'] ?? '',
+            ];
+        }
+
+        if (!empty($inserted)) {
+            $this->guardarLogSincronizacion($inserted, $idResponsable);
+            if (PHP_SAPI === 'cli') {
+                $this->guardarNotificacionSincronizacion($inserted);
+            }
         }
 
         return [
             'consulted' => $facturas,
             'inserted' => $inserted,
+            'responsable' => $idResponsable,
         ];
+    }
+
+    private function guardarLogSincronizacion(array $facturasInsertadas, int $idResponsable): void
+    {
+        $logDir = __DIR__ . '/../logs';
+        if (!is_dir($logDir) && !mkdir($logDir, 0775, true) && !is_dir($logDir)) {
+            return;
+        }
+
+        $fechaActual = date('Y-m-d');
+        $logPath = $logDir . '/sincronizacion_' . $fechaActual . '.txt';
+        $timestamp = date('Y-m-d H:i:s');
+        $lista = [];
+        $lista[] = 'Fecha/Hora: ' . $timestamp;
+        $lista[] = 'Responsable: ' . $idResponsable;
+        $lista[] = 'Total sincronizadas: ' . count($facturasInsertadas);
+        $lista[] = '---';
+
+        foreach ($facturasInsertadas as $factura) {
+            $documento = (string) ($factura['documento'] ?? '');
+            if ($documento !== '') {
+                $lista[] = $documento;
+            }
+        }
+
+        $lista[] = '==================================================';
+        $contenido = implode(PHP_EOL, $lista) . PHP_EOL;
+        file_put_contents($logPath, $contenido, LOCK_EX);
+    }
+
+    private function guardarNotificacionSincronizacion(array $facturasInsertadas): void
+    {
+        $notificacionPath = __DIR__ . '/../logs/notificacion_sincronizacion.json';
+        $notificacion = [
+            'inserted_count' => count($facturasInsertadas),
+            'documentos' => array_values(array_filter(array_map(
+                static fn(array $factura): string => (string) ($factura['documento'] ?? ''),
+                $facturasInsertadas
+            ))),
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        file_put_contents($notificacionPath, json_encode($notificacion), LOCK_EX);
+    }
+
+    public function obtenerNotificacionSincronizacion(): ?array
+    {
+        $notificacionPath = __DIR__ . '/../logs/notificacion_sincronizacion.json';
+        if (!is_file($notificacionPath)) {
+            return null;
+        }
+
+        $contenido = file_get_contents($notificacionPath);
+        if ($contenido === false) {
+            return null;
+        }
+
+        $notificacion = json_decode($contenido, true);
+        if (!is_array($notificacion)) {
+            return null;
+        }
+
+        unlink($notificacionPath);
+        return $notificacion;
     }
 }

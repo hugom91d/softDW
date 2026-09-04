@@ -55,4 +55,13 @@ class FacturaController
             'consulted_count' => count($result['consulted']),
         ], JSON_PRETTY_PRINT);
     }
+
+    public function notificacionSincronizacion()
+    {
+        $model = new FacturaModel();
+        $notificacion = $model->obtenerNotificacionSincronizacion();
+
+        header('Content-Type: application/json');
+        echo json_encode($notificacion ?? ['inserted_count' => 0]);
+    }
 }

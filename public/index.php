@@ -17,7 +17,7 @@ if (!empty($_SESSION['fuerza_cambio_password'])) {
 $controller = $_GET['controller'] ?? 'factura';
 $action = $_GET['action'] ?? 'listar';
 
-$accionesPermitidasOperador = ['sincronizar'];
+$accionesPermitidasOperador = ['sincronizar', 'notificacionSincronizacion'];
 if (($_SESSION['rol'] ?? '') === 'operador' && !in_array($action, $accionesPermitidasOperador, true)) {
     http_response_code(403);
     echo "Acceso no autorizado";
