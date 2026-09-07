@@ -127,6 +127,10 @@ function monitorAutomaticSyncNotifications() {
                 const insertedCount = Number(notification?.inserted_count ?? 0);
                 if (insertedCount > 0) {
                     playSyncAlert(`Se sincronizaron ${insertedCount} facturas nuevas automáticamente.`);
+
+                    if (document.getElementById('reposicionesActualesBody')) {
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
                 }
             })
             .catch(() => {
