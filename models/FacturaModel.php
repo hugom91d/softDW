@@ -116,6 +116,22 @@ class FacturaModel
         return $success && $affected > 0;
     }
 
+    public function archivarFacturaAnulada(int $idFactura): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare("UPDATE factura SET estado = 1 WHERE id_factura = ? AND estado_factura = 'A'");
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('i', $idFactura);
+        $success = $stmt->execute();
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $success && $affected > 0;
+    }
+
     public function marcarDetalleComoRepuesto(int $idDetalle): bool
     {
         $conn = $this->getConnection();

@@ -233,6 +233,45 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function bindArchiveFacturaButtons() {
+        document.querySelectorAll('.btn-archivar').forEach(button => {
+            button.addEventListener('click', function() {
+                const idFactura = this.dataset.id;
+                if (!idFactura || this.disabled) {
+                    return;
+                }
+
+                const buttonElement = this;
+                buttonElement.disabled = true;
+                fetch('reposiciones.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=archivar&id_factura=${encodeURIComponent(idFactura)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const row = buttonElement.closest('tr');
+                            const table = buttonElement.closest('table');
+                            if (row) {
+                                row.remove();
+                            }
+                            if (table) {
+                                refreshTablePagination(table.id);
+                            }
+                        } else {
+                            buttonElement.disabled = false;
+                            showSystemNotification('No se pudo archivar la factura.');
+                        }
+                    })
+                    .catch(() => {
+                        buttonElement.disabled = false;
+                        showSystemNotification('Error al archivar la factura.');
+                    });
+            });
+        });
+    }
+
     function bindMarkDetailButtons() {
         document.querySelectorAll('.btn-mark-detail').forEach(button => {
             button.addEventListener('click', function() {
@@ -282,12 +321,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const detalleTable = document.getElementById('detalleTable');
+
     document.querySelectorAll('.btn-ver').forEach(button => {
         button.addEventListener('click', function() {
             const idFactura = this.dataset.id;
             if (!idFactura || this.disabled) {
                 return;
             }
+
+            const esAnulada = this.dataset.anulada === '1';
+            detalleTable?.classList.toggle('hide-actions', esAnulada);
 
             fetch(`reposiciones.php?action=detalle&id_factura=${encodeURIComponent(idFactura)}`)
                 .then(response => response.json())
@@ -303,6 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td data-label="Cantidad">${detalle.cantidad ?? '-'}</td>
                             <td data-label="Descripción">${detalle.descripcion ?? '-'}</td>
                             <td>${detalle.estado == 0 ? 'Abierto' : (detalle.estado == 1 ? 'Repuesto' : 'No repuesto')}</td>
+                            ${esAnulada ? '' : `
                             <td data-label="Acciones">
                                 <div class="detalle-actions">
                                     <button type="button" class="btn-mark-detail${detalle.estado != 0 ? ' disabled' : ''}" data-detalle-id="${detalle.id_detalle}" ${detalle.estado != 0 ? 'disabled="disabled"' : ''} title="Marcar como repuesto">
@@ -312,20 +357,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <i class="fa-solid fa-xmark"></i>
                                     </button>
                                 </div>
-                            </td>
-                        </tr>`).join('') : '<tr><td colspan="6">No hay detalles para esta factura.</td></tr>';
+                            </td>`}
+                        </tr>`).join('') : `<tr><td colspan="${esAnulada ? 5 : 6}">No hay detalles para esta factura.</td></tr>`;
 
-                    bindMarkDetailButtons();
+                    if (!esAnulada) {
+                        bindMarkDetailButtons();
+                    }
                     openModal(idFactura);
                 })
                 .catch(() => {
-                    detalleBody.innerHTML = '<tr><td colspan="6">Error al cargar el detalle.</td></tr>';
+                    detalleBody.innerHTML = `<tr><td colspan="${esAnulada ? 5 : 6}">Error al cargar el detalle.</td></tr>`;
                     openModal(idFactura);
                 });
         });
     });
 
     bindCloseFacturaButtons();
+    bindArchiveFacturaButtons();
 
     closeDetail.addEventListener('click', closeModal);
     systemNotificationAccept.addEventListener('click', closeSystemNotification);

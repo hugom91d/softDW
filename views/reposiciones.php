@@ -30,6 +30,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['action']))
         exit;
     }
 
+    if ($_POST['action'] === 'archivar' && isset($_POST['id_factura'])) {
+        $idFactura = intval($_POST['id_factura']);
+        $success = $model->archivarFacturaAnulada($idFactura);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => $success], JSON_PRETTY_PRINT);
+        exit;
+    }
+
     if ($_POST['action'] === 'repuesto' && isset($_POST['id_detalle'])) {
         $idDetalle = intval($_POST['id_detalle']);
         $success = $model->marcarDetalleComoRepuesto($idDetalle);
@@ -150,12 +158,18 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
                                     <?php endif; ?>
                                 </td>
                                 <td class="acciones">
-                                    <button type="button" class="btn-ver<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Ver detalle' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
+                                    <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" data-anulada="<?= $facturaAnulada ? '1' : '0' ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cerrar<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Cerrar factura' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
+                                    <?php if ($facturaAnulada): ?>
+                                        <button type="button" class="btn-archivar" data-id="<?= $factura['id_factura'] ?>" title="Archivar factura anulada">
+                                            <i class="fa-solid fa-box-archive"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn-cerrar" data-id="<?= $factura['id_factura'] ?>" title="Cerrar factura">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -209,12 +223,18 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
                                     <?php endif; ?>
                                 </td>
                                 <td class="acciones">
-                                    <button type="button" class="btn-ver<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Ver detalle' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
+                                    <button type="button" class="btn-ver" data-id="<?= $factura['id_factura'] ?>" data-anulada="<?= $facturaAnulada ? '1' : '0' ?>" title="Ver detalle">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cerrar<?= $facturaAnulada ? ' disabled' : '' ?>" data-id="<?= $factura['id_factura'] ?>" title="<?= $facturaAnulada ? 'Factura anulada' : 'Cerrar factura' ?>" <?= $facturaAnulada ? 'disabled' : '' ?>>
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
+                                    <?php if ($facturaAnulada): ?>
+                                        <button type="button" class="btn-archivar" data-id="<?= $factura['id_factura'] ?>" title="Archivar factura anulada">
+                                            <i class="fa-solid fa-box-archive"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn-cerrar" data-id="<?= $factura['id_factura'] ?>" title="Cerrar factura">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
