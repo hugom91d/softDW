@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <option value="">Selecciona una opción</option>
                     <option value="No hay stock en GPS">No hay stock en GPS</option>
                     <option value="Solicitar stock a Quito">Solicitar stock a Quito</option>
+                    <option value="Se termino penda en descuento">Se termino prenda en descuento</option>
                 </select>
                 <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
             </div>
