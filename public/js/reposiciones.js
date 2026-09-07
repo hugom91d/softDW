@@ -88,6 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showSystemNotification(message) {
         systemNotificationMessage.textContent = message;
+        systemNotificationAccept.textContent = 'Aceptar';
+        systemNotificationAccept.onclick = null;
         systemNotification.classList.add('show');
         systemNotificationAccept.focus();
     }

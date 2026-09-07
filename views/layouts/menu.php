@@ -12,23 +12,30 @@ if (session_status() === PHP_SESSION_NONE) {
         <img src="../public/img/logo.png" alt="Logo">
     </div>
 
-    <div class="user-menu">
-        <button type="button" class="user-button" id="userButton">
-            <i class="fa-solid fa-user"></i>
+    <div class="topbar-actions">
+        <button type="button" class="new-invoices-button" id="newInvoicesButton" title="Facturas nuevas sincronizadas" aria-label="Facturas nuevas sincronizadas">
+            <i class="fa-solid fa-bell"></i>
+            <span class="new-invoices-badge" id="newInvoicesBadge" style="display:none;">0</span>
         </button>
 
-        <div class="dropdown-menu" id="dropdownMenu">
-            <div class="dropdown-user" style="color: #222;">
-                <?= htmlspecialchars($_SESSION['nombre'] ?? 'Usuario') ?>
+        <div class="user-menu">
+            <button type="button" class="user-button" id="userButton">
+                <i class="fa-solid fa-user"></i>
+            </button>
+
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-user" style="color: #222;">
+                    <?= htmlspecialchars($_SESSION['nombre'] ?? 'Usuario') ?>
+                </div>
+                <a href="../views/perfil.php">
+                    <i class="fa-solid fa-id-badge"></i>
+                    <span>Mi Perfil</span>
+                </a>
+                <a href="../public/logout.php">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
             </div>
-            <a href="../views/perfil.php">
-                <i class="fa-solid fa-id-badge"></i>
-                <span>Mi Perfil</span>
-            </a>
-            <a href="../public/logout.php">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Cerrar Sesión</span>
-            </a>
         </div>
     </div>
 </header>

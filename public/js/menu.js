@@ -43,7 +43,8 @@ function formatCurrency(value) {
     return `<span class="currency-symbol">$</span><span class="currency-value">${formatted}</span>`;
 }
 
-function playSyncAlert(message = 'Hay facturas nuevas sincronizadas.') {
+function playSyncAlert(message = 'Hay facturas nuevas sincronizadas.', options = {}) {
+    const reloadOnAccept = options.reloadOnAccept === true;
     try {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;
         if (AudioCtor) {
@@ -99,6 +100,8 @@ function playSyncAlert(message = 'Hay facturas nuevas sincronizadas.') {
         notificationElement.classList.add('show');
         const acceptButton = document.getElementById('systemNotificationAccept');
         if (acceptButton) {
+            acceptButton.textContent = reloadOnAccept ? 'Ir' : 'Aceptar';
+            acceptButton.onclick = reloadOnAccept ? () => window.location.reload() : null;
             acceptButton.focus();
         }
     }
@@ -116,7 +119,50 @@ function playSyncAlert(message = 'Hay facturas nuevas sincronizadas.') {
 
 window.playSyncAlert = playSyncAlert;
 
+const NEW_INVOICES_COUNT_KEY = 'unseenNewInvoicesCount';
+
+function getNewInvoicesBadge() {
+    return document.getElementById('newInvoicesBadge');
+}
+
+function renderNewInvoicesBadge() {
+    const badge = getNewInvoicesBadge();
+    if (!badge) {
+        return;
+    }
+
+    const count = Number(localStorage.getItem(NEW_INVOICES_COUNT_KEY) || 0);
+    badge.textContent = String(count);
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function addNewInvoicesCount(amount) {
+    const current = Number(localStorage.getItem(NEW_INVOICES_COUNT_KEY) || 0);
+    localStorage.setItem(NEW_INVOICES_COUNT_KEY, String(current + amount));
+    renderNewInvoicesBadge();
+}
+
+function clearNewInvoicesCount() {
+    localStorage.setItem(NEW_INVOICES_COUNT_KEY, '0');
+    renderNewInvoicesBadge();
+}
+
+function initNewInvoicesButton() {
+    renderNewInvoicesBadge();
+
+    if (document.getElementById('reposicionesActualesBody')) {
+        clearNewInvoicesCount();
+    }
+
+    document.getElementById('newInvoicesButton')?.addEventListener('click', function() {
+        window.location.href = '../views/reposiciones.php';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initNewInvoicesButton);
+
 function monitorAutomaticSyncNotifications() {
+    const LAST_SEEN_KEY = 'lastSyncNotificationAt';
     const checkNotification = () => {
         fetch('../public/index.php?controller=factura&action=notificacionSincronizacion', {
             credentials: 'same-origin',
@@ -125,13 +171,22 @@ function monitorAutomaticSyncNotifications() {
             .then(response => response.ok ? response.json() : null)
             .then(notification => {
                 const insertedCount = Number(notification?.inserted_count ?? 0);
-                if (insertedCount > 0) {
-                    playSyncAlert(`Se sincronizaron ${insertedCount} facturas nuevas automáticamente.`);
-
-                    if (document.getElementById('reposicionesActualesBody')) {
-                        setTimeout(() => window.location.reload(), 1500);
-                    }
+                const createdAt = notification?.created_at ?? '';
+                if (insertedCount <= 0 || !createdAt) {
+                    return;
                 }
+
+                const lastSeen = localStorage.getItem(LAST_SEEN_KEY) || '';
+                if (createdAt === lastSeen) {
+                    return;
+                }
+
+                localStorage.setItem(LAST_SEEN_KEY, createdAt);
+                const enReposiciones = !!document.getElementById('reposicionesActualesBody');
+                if (!enReposiciones) {
+                    addNewInvoicesCount(insertedCount);
+                }
+                playSyncAlert(`Se sincronizaron ${insertedCount} facturas nuevas automáticamente.`, { reloadOnAccept: enReposiciones });
             })
             .catch(() => {
                 // El siguiente sondeo reintentará la consulta.

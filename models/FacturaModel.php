@@ -432,7 +432,6 @@ class FacturaModel
             return null;
         }
 
-        unlink($notificacionPath);
         return $notificacion;
     }
 }
