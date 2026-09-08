@@ -20,6 +20,11 @@ return [
             'base_url' => 'https://api.contifico.com/sistema/api/v1/producto/',
             // TODO: agregar token de Contifico de la bodega Ayora
             'token' => ''
+        ],
+        'stock' => [
+            'base_url' => 'https://api.contifico.com/sistema/api/v1/producto/',
+            'stock_url' => 'https://api.contifico.com/sistema/api/v2/producto/',
+            'token' => 'D9C8xJTou25JSdBA8GVe92h9Ni7AwIBbLTVaxvEGlhQ'
         ]
     ]
 ];

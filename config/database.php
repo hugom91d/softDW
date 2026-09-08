@@ -40,6 +40,7 @@ $camposProductos = [
     'stock_uio' => 'DECIMAL(10,2) NULL DEFAULT NULL',
     'stock_baltra' => 'DECIMAL(10,2) NULL DEFAULT NULL',
     'stock_puerto_ayora' => 'DECIMAL(10,2) NULL DEFAULT NULL',
+    'codigoStock' => 'VARCHAR(50) NULL DEFAULT NULL',
 ];
 
 foreach ($camposProductos as $campo => $tipo) {

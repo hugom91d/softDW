@@ -38,6 +38,18 @@ if (!isset($_SESSION['cedula'])) {
                         <div class="action-label">Facturas</div>
                     </button>
 
+                    <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>
+                    <button class="action-button" id="btnCodigoProductos" title="Sincronizar Código Productos">
+                        <div class="action-icon"><i class="fa-solid fa-barcode fa-2x"></i></div>
+                        <div class="action-label">Código Productos</div>
+                    </button>
+
+                    <button class="action-button" id="btnSincronizarStock" title="Sincronizar Stock">
+                        <div class="action-icon"><i class="fa-solid fa-boxes-stacked fa-2x"></i></div>
+                        <div class="action-label">Sincronizar Stock</div>
+                    </button>
+                    <?php endif; ?>
+
                 </div>
             </div>
         </section>

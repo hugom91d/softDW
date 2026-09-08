@@ -24,16 +24,38 @@ if (($_SESSION['rol'] ?? '') === 'operador' && !in_array($action, $accionesPermi
     exit;
 }
 
+if ($controller === 'producto' && ($_SESSION['rol'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo "Acceso no autorizado";
+    exit;
+}
+
 require_once '../services/HttpClient.php';
 require_once '../services/FacturaApi.php';
+require_once '../services/ProductoApi.php';
 require_once '../models/FacturaModel.php';
+require_once '../models/ProductoModel.php';
 require_once '../controllers/FacturaController.php';
+require_once '../controllers/ProductoController.php';
 
 switch ($controller) {
 
     case 'factura':
 
         $obj = new FacturaController();
+
+        if (method_exists($obj, $action)) {
+            $obj->$action();
+        } else {
+            http_response_code(404);
+            echo "Acción no encontrada";
+        }
+
+        break;
+
+    case 'producto':
+
+        $obj = new ProductoController();
 
         if (method_exists($obj, $action)) {
             $obj->$action();

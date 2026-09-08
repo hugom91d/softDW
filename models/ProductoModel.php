@@ -197,10 +197,255 @@ class ProductoModel
         return null;
     }
 
+    public function obtenerCodigosPendientesSincronizacion(): array
+    {
+        $conn = $this->getConnection();
+        $descripcionCampo = $this->obtenerCampoDescripcion($conn);
+        $selectDescripcion = $descripcionCampo !== null ? ", $descripcionCampo AS descripcion" : ", '' AS descripcion";
+
+        // Se consultan todos los códigos pendientes (sin límite de pruebas)
+        $resultado = $conn->query(
+            "SELECT codigo" . $selectDescripcion . " FROM productos WHERE codigo IS NOT NULL AND codigo <> '' AND (codigoStock IS NULL OR codigoStock = '') ORDER BY codigo ASC"
+        );
+
+        if (!$resultado) {
+            return [];
+        }
+
+        $codigos = [];
+        while ($fila = $resultado->fetch_assoc()) {
+            $codigo = trim((string) ($fila['codigo'] ?? ''));
+            if ($codigo !== '') {
+                $codigos[] = [
+                    'codigo' => $codigo,
+                    'descripcion' => trim((string) ($fila['descripcion'] ?? '')),
+                ];
+            }
+        }
+
+        return $codigos;
+    }
+
+    public function actualizarCodigoStock(string $codigo, string $codigoStock): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            "UPDATE productos SET codigoStock = ? WHERE codigo = ? AND (codigoStock IS NULL OR codigoStock = '')"
+        );
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param('ss', $codigoStock, $codigo);
+        $success = $stmt->execute();
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $success && $affected > 0;
+    }
+
+    public function sincronizarUnCodigo(string $codigo): array
+    {
+        require_once __DIR__ . '/../services/ProductoApi.php';
+
+        $codigo = trim($codigo);
+        if ($codigo === '') {
+            return ['codigo' => $codigo, 'encontrado' => false, 'error' => 'Código vacío'];
+        }
+
+        $api = new ProductoApi();
+
+        try {
+            $producto = $api->buscarProductoPorCodigo('stock', $codigo);
+        } catch (Exception $e) {
+            return ['codigo' => $codigo, 'encontrado' => false, 'error' => $e->getMessage()];
+        }
+
+        $idStock = trim((string) ($producto['id'] ?? ''));
+        if ($idStock === '') {
+            return ['codigo' => $codigo, 'encontrado' => false];
+        }
+
+        $actualizado = $this->actualizarCodigoStock($codigo, $idStock);
+
+        return [
+            'codigo' => $codigo,
+            'encontrado' => true,
+            'codigoStock' => $idStock,
+            'actualizado' => $actualizado,
+        ];
+    }
+
+    public function sincronizarCodigosStock(): array
+    {
+        require_once __DIR__ . '/../services/ProductoApi.php';
+
+        $api = new ProductoApi();
+        $codigos = $this->obtenerCodigosPendientesSincronizacion();
+
+        $actualizados = [];
+        $noEncontrados = [];
+        $errores = [];
+
+        foreach ($codigos as $item) {
+            $codigo = $item['codigo'];
+            try {
+                $producto = $api->buscarProductoPorCodigo('stock', $codigo);
+            } catch (Exception $e) {
+                $errores[] = $codigo;
+                continue;
+            }
+
+            $idStock = trim((string) ($producto['id'] ?? ''));
+            if ($idStock === '') {
+                $noEncontrados[] = $codigo;
+                continue;
+            }
+
+            if ($this->actualizarCodigoStock($codigo, $idStock)) {
+                $actualizados[] = ['codigo' => $codigo, 'codigoStock' => $idStock];
+            } else {
+                $errores[] = $codigo;
+            }
+        }
+
+        return [
+            'total' => count($codigos),
+            'actualizados' => $actualizados,
+            'no_encontrados' => $noEncontrados,
+            'errores' => $errores,
+        ];
+    }
+
     private function getConnection(): mysqli
     {
         require __DIR__ . '/../config/database.php';
         return $conn;
+    }
+
+    public function obtenerProductosPendientesStock(): array
+    {
+        $conn = $this->getConnection();
+        $descripcionCampo = $this->obtenerCampoDescripcion($conn);
+        $selectDescripcion = $descripcionCampo !== null ? ", $descripcionCampo AS descripcion" : ", '' AS descripcion";
+
+        // TODO: quitar el LIMIT de pruebas cuando el proceso quede validado
+        $resultado = $conn->query(
+            "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY RAND() LIMIT 5"
+        );
+
+        if (!$resultado) {
+            return [];
+        }
+
+        $productos = [];
+        while ($fila = $resultado->fetch_assoc()) {
+            $codigo = trim((string) ($fila['codigo'] ?? ''));
+            $codigoStock = trim((string) ($fila['codigoStock'] ?? ''));
+            if ($codigo !== '' && $codigoStock !== '') {
+                $productos[] = [
+                    'codigo' => $codigo,
+                    'codigoStock' => $codigoStock,
+                    'descripcion' => trim((string) ($fila['descripcion'] ?? '')),
+                ];
+            }
+        }
+
+        return $productos;
+    }
+
+    public function sincronizarStockUnProducto(string $codigo, string $codigoStock): array
+    {
+        require_once __DIR__ . '/../services/ProductoApi.php';
+
+        $codigo = trim($codigo);
+        $codigoStock = trim($codigoStock);
+        if ($codigo === '' || $codigoStock === '') {
+            return ['codigo' => $codigo, 'actualizado' => false, 'error' => 'Faltan datos del producto'];
+        }
+
+        $api = new ProductoApi();
+
+        try {
+            $bodegas = $api->consultarStockPorCodigo($codigoStock);
+        } catch (Exception $e) {
+            return ['codigo' => $codigo, 'actualizado' => false, 'error' => $e->getMessage()];
+        }
+
+        if (!is_array($bodegas)) {
+            return ['codigo' => $codigo, 'actualizado' => false, 'error' => 'Respuesta inválida de la API'];
+        }
+
+        $stock = [
+            'stock_uio' => 0.0,
+            'stock_baltra' => 0.0,
+            'stock_puerto_ayora' => 0.0,
+        ];
+
+        foreach ($bodegas as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $columna = $this->mapearColumnaBodega((string) ($item['bodega_nombre'] ?? ''));
+            if ($columna !== null) {
+                $stock[$columna] = (float) ($item['cantidad'] ?? 0);
+            }
+        }
+
+        $actualizado = $this->actualizarStockProducto($codigo, $stock);
+
+        return [
+            'codigo' => $codigo,
+            'actualizado' => $actualizado,
+            'stock_uio' => $stock['stock_uio'],
+            'stock_baltra' => $stock['stock_baltra'],
+            'stock_puerto_ayora' => $stock['stock_puerto_ayora'],
+        ];
+    }
+
+    public function actualizarStockProducto(string $codigo, array $stock): bool
+    {
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            'UPDATE productos SET stock_uio = ?, stock_baltra = ?, stock_puerto_ayora = ? WHERE codigo = ?'
+        );
+        if (!$stmt) {
+            return false;
+        }
+
+        $uio = (float) ($stock['stock_uio'] ?? 0.0);
+        $baltra = (float) ($stock['stock_baltra'] ?? 0.0);
+        $ayora = (float) ($stock['stock_puerto_ayora'] ?? 0.0);
+
+        $stmt->bind_param('ddds', $uio, $baltra, $ayora, $codigo);
+        $success = $stmt->execute();
+        $stmt->close();
+
+        return $success;
+    }
+
+    private function mapearColumnaBodega(string $nombreBodega): ?string
+    {
+        $nombre = mb_strtolower($nombreBodega, 'UTF-8');
+
+        if ($nombre === '') {
+            return null;
+        }
+
+        if (str_contains($nombre, 'dw') || str_contains($nombre, 'import-export') || str_contains($nombre, 'import export')) {
+            return 'stock_uio';
+        }
+
+        if (str_contains($nombre, 'baltra')) {
+            return 'stock_baltra';
+        }
+
+        if (str_contains($nombre, 'ayora')) {
+            return 'stock_puerto_ayora';
+        }
+
+        return null;
     }
 
     private function formatearCantidad($cantidad): float
