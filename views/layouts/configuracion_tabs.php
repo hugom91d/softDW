@@ -7,4 +7,8 @@
         <i class="fas fa-gear"></i>
         <span>Stock</span>
     </a>
+    <a class="<?= ($configuracionActiva ?? '') === 'sincronizacion' ? 'active' : '' ?>" href="configuracion_sincronizacion.php">
+        <i class="fas fa-rotate"></i>
+        <span>Sincronización</span>
+    </a>
 </nav>

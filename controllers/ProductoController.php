@@ -12,8 +12,11 @@ class ProductoController
             return;
         }
 
+        require_once __DIR__ . '/../models/ConfiguracionSincronizacionModel.php';
+        $configuracion = (new ConfiguracionSincronizacionModel())->obtener();
+
         $model = new ProductoModel();
-        echo json_encode($model->obtenerCodigosPendientesSincronizacion(), JSON_PRETTY_PRINT);
+        echo json_encode($model->obtenerCodigosPendientesSincronizacion($configuracion['limite_codigos']), JSON_PRETTY_PRINT);
     }
 
     public function sincronizarUno()
@@ -63,8 +66,11 @@ class ProductoController
             return;
         }
 
+        require_once __DIR__ . '/../models/ConfiguracionSincronizacionModel.php';
+        $configuracion = (new ConfiguracionSincronizacionModel())->obtener();
+
         $model = new ProductoModel();
-        echo json_encode($model->obtenerProductosPendientesStock(), JSON_PRETTY_PRINT);
+        echo json_encode($model->obtenerProductosPendientesStock($configuracion['limite_stock']), JSON_PRETTY_PRINT);
     }
 
     public function sincronizarStockUno()

@@ -197,16 +197,26 @@ class ProductoModel
         return null;
     }
 
-    public function obtenerCodigosPendientesSincronizacion(): array
+    public function obtenerCodigosPendientesSincronizacion(int $limite = 0): array
     {
         $conn = $this->getConnection();
         $descripcionCampo = $this->obtenerCampoDescripcion($conn);
         $selectDescripcion = $descripcionCampo !== null ? ", $descripcionCampo AS descripcion" : ", '' AS descripcion";
 
-        // Se consultan todos los códigos pendientes (sin límite de pruebas)
-        $resultado = $conn->query(
-            "SELECT codigo" . $selectDescripcion . " FROM productos WHERE codigo IS NOT NULL AND codigo <> '' AND (codigoStock IS NULL OR codigoStock = '') ORDER BY codigo ASC"
-        );
+        // $limite <= 0 significa sin límite
+        $sql = "SELECT codigo" . $selectDescripcion . " FROM productos WHERE codigo IS NOT NULL AND codigo <> '' AND (codigoStock IS NULL OR codigoStock = '') ORDER BY codigo ASC";
+
+        if ($limite > 0) {
+            $stmt = $conn->prepare($sql . ' LIMIT ?');
+            if (!$stmt) {
+                return [];
+            }
+            $stmt->bind_param('i', $limite);
+            $stmt->execute();
+            $resultado = $stmt->get_result();
+        } else {
+            $resultado = $conn->query($sql);
+        }
 
         if (!$resultado) {
             return [];
@@ -323,16 +333,25 @@ class ProductoModel
         return $conn;
     }
 
-    public function obtenerProductosPendientesStock(): array
+    public function obtenerProductosPendientesStock(int $limite = 5): array
     {
         $conn = $this->getConnection();
         $descripcionCampo = $this->obtenerCampoDescripcion($conn);
         $selectDescripcion = $descripcionCampo !== null ? ", $descripcionCampo AS descripcion" : ", '' AS descripcion";
 
-        // TODO: quitar el LIMIT de pruebas cuando el proceso quede validado
-        $resultado = $conn->query(
-            "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY RAND() LIMIT 5"
-        );
+        $sql = "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY RAND()";
+
+        if ($limite > 0) {
+            $stmt = $conn->prepare($sql . ' LIMIT ?');
+            if (!$stmt) {
+                return [];
+            }
+            $stmt->bind_param('i', $limite);
+            $stmt->execute();
+            $resultado = $stmt->get_result();
+        } else {
+            $resultado = $conn->query($sql);
+        }
 
         if (!$resultado) {
             return [];

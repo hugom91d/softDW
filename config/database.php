@@ -60,3 +60,11 @@ $conn->query(
         color_disponible CHAR(7) NOT NULL DEFAULT '#16a34a'
     )"
 );
+
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS configuracion_sincronizacion (
+        id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+        limite_codigos INT UNSIGNED NOT NULL DEFAULT 0,
+        limite_stock INT UNSIGNED NOT NULL DEFAULT 5
+    )"
+);
