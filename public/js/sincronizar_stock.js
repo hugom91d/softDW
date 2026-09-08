@@ -76,9 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            productos.forEach(agregarFila);
-
             for (const producto of productos) {
+                agregarFila(producto);
+
                 const fila = document.getElementById(`fila-${producto.codigo}`);
                 if (fila) {
                     fila.querySelector('.stock-estado').textContent = 'Sincronizando...';

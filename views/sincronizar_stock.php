@@ -43,7 +43,7 @@ if (($_SESSION['rol'] ?? '') !== 'admin') {
         </div>
 
         <section class="card">
-            <div class="table-container">
+            <div class="table-container table-container-scroll">
                 <table id="stockSyncTable">
                     <thead>
                         <tr>
