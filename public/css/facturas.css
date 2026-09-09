@@ -82,3 +82,56 @@
 #facturasTable th:nth-child(5) {
     text-align: left;
 }
+
+.reporte-filtros {
+    flex-wrap: nowrap;
+}
+
+.reporte-filtros label {
+    white-space: nowrap;
+    gap: 6px;
+}
+
+.reporte-filtros input[type="date"] {
+    width: 150px;
+}
+
+.reporte-filtros button,
+.reporte-descarga {
+    min-height: 54px;
+    width: auto;
+    margin: 0;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #ef0000;
+    border-radius: 14px;
+    background: #ef0000;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.reporte-filtros button:hover,
+.reporte-descarga:hover,
+.reporte-filtros button:focus-visible,
+.reporte-descarga:focus-visible {
+    background: #000000;
+    border-color: #000000;
+    color: #ef0000;
+}
+
+@media (max-width: 768px) {
+    .reporte-filtros {
+        flex-wrap: wrap;
+    }
+
+    .reporte-filtros button,
+    .reporte-descarga {
+        width: 100%;
+    }
+}

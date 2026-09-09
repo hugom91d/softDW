@@ -31,6 +31,11 @@ if ($resultado && $resultado->num_rows === 0) {
     $conn->query("ALTER TABLE factura ADD COLUMN estado_factura CHAR(1) NULL AFTER estado");
 }
 
+$resultado = $conn->query("SHOW COLUMNS FROM detalle_factura LIKE 'fecha_no_repuesto'");
+if ($resultado && $resultado->num_rows === 0) {
+    $conn->query("ALTER TABLE detalle_factura ADD COLUMN fecha_no_repuesto DATETIME NULL DEFAULT NULL AFTER observacion");
+}
+
 $resultado = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'DebeCambiarContrasena'");
 if ($resultado && $resultado->num_rows === 0) {
     $conn->query("ALTER TABLE usuarios ADD COLUMN DebeCambiarContrasena TINYINT(1) NOT NULL DEFAULT 1 AFTER Contrasena");

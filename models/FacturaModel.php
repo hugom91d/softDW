@@ -61,6 +61,46 @@ class FacturaModel
         return is_array($facturas) ? $facturas : [];
     }
 
+    public function getFacturasCerradasPorFecha(string $fechaInicio, string $fechaFin): array
+    {
+        $fechaInicio = trim($fechaInicio);
+        $fechaFin = trim($fechaFin);
+        $inicio = DateTime::createFromFormat('!Y-m-d', $fechaInicio);
+        $fin = DateTime::createFromFormat('!Y-m-d', $fechaFin);
+        if (
+            $inicio === false || $inicio->format('Y-m-d') !== $fechaInicio
+            || $fin === false || $fin->format('Y-m-d') !== $fechaFin
+            || $inicio > $fin
+        ) {
+            return [];
+        }
+
+        $inicioSql = $inicio->format('Y-m-d 00:00:00');
+        $finSql = $fin->modify('+1 day')->format('Y-m-d 00:00:00');
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            "SELECT f.numero_factura, f.fecha, f.fecha_cierre,
+                    COALESCE(NULLIF(TRIM(u.Nombre), ''), 'Sin responsable') AS responsable
+             FROM factura f
+             LEFT JOIN usuarios u ON CAST(u.Cedula AS CHAR) = CAST(f.id_responsable AS CHAR)
+             WHERE f.estado = 1 AND f.fecha >= ? AND f.fecha < ?
+             ORDER BY f.fecha_cierre ASC, f.id_factura ASC"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('ss', $inicioSql, $finSql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $facturas = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+
+        return is_array($facturas) ? $facturas : [];
+    }
+
     public function getDetalleFactura(int $idFactura): array
     {
         $conn = $this->getConnection();
@@ -151,12 +191,13 @@ class FacturaModel
     public function marcarDetalleComoNoRepuesto(int $idDetalle): bool
     {
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("UPDATE detalle_factura SET estado = 2 WHERE id_detalle = ? AND estado = 0");
+        $fechaNoRepuesto = (new DateTime('now', new DateTimeZone('America/Guayaquil')))->format('Y-m-d H:i:s');
+        $stmt = $conn->prepare("UPDATE detalle_factura SET estado = 2, fecha_no_repuesto = ? WHERE id_detalle = ? AND estado = 0");
         if (!$stmt) {
             return false;
         }
 
-        $stmt->bind_param('i', $idDetalle);
+        $stmt->bind_param('si', $fechaNoRepuesto, $idDetalle);
         $success = $stmt->execute();
         $affected = $stmt->affected_rows;
         $stmt->close();
@@ -167,17 +208,64 @@ class FacturaModel
     public function marcarDetalleComoNoRepuestoConObservacion(int $idDetalle, string $observacion = ''): bool
     {
         $conn = $this->getConnection();
-        $stmt = $conn->prepare("UPDATE detalle_factura SET estado = 2, observacion = ? WHERE id_detalle = ? AND estado = 0");
+        $fechaNoRepuesto = (new DateTime('now', new DateTimeZone('America/Guayaquil')))->format('Y-m-d H:i:s');
+        $stmt = $conn->prepare("UPDATE detalle_factura SET estado = 2, observacion = ?, fecha_no_repuesto = ? WHERE id_detalle = ? AND estado = 0");
         if (!$stmt) {
             return false;
         }
 
-        $stmt->bind_param('si', $observacion, $idDetalle);
+        $stmt->bind_param('ssi', $observacion, $fechaNoRepuesto, $idDetalle);
         $success = $stmt->execute();
         $affected = $stmt->affected_rows;
         $stmt->close();
 
         return $success && $affected > 0;
+    }
+
+    public function getDetallesNoRepuestos(string $fechaInicio, string $fechaFin): array
+    {
+        $fechaInicio = trim($fechaInicio);
+        $fechaFin = trim($fechaFin);
+        $inicio = DateTime::createFromFormat('!Y-m-d', $fechaInicio);
+        $fin = DateTime::createFromFormat('!Y-m-d', $fechaFin);
+        if (
+            $inicio === false || $inicio->format('Y-m-d') !== $fechaInicio
+            || $fin === false || $fin->format('Y-m-d') !== $fechaFin
+            || $inicio > $fin
+        ) {
+            return [];
+        }
+
+        $inicioSql = $inicio->format('Y-m-d 00:00:00');
+        $finSql = $fin->modify('+1 day')->format('Y-m-d 00:00:00');
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            "SELECT f.numero_factura,
+                    COALESCE(NULLIF(TRIM(u.Nombre), ''), 'Sin responsable') AS responsable,
+                    d.codigo_interno AS codigo_producto,
+                    d.descripcion AS nombre_producto,
+                    d.cantidad,
+                    COALESCE(NULLIF(TRIM(d.observacion), ''), 'Sin observación') AS observacion,
+                    f.fecha AS fecha_factura,
+                    f.fecha_cierre
+             FROM detalle_factura d
+             INNER JOIN factura f ON f.id_factura = d.id_factura
+             LEFT JOIN usuarios u ON CAST(u.Cedula AS CHAR) = CAST(f.id_responsable AS CHAR)
+             WHERE d.estado = 2 AND f.fecha >= ? AND f.fecha < ?
+             ORDER BY f.fecha DESC, f.id_factura DESC, d.id_detalle DESC"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('ss', $inicioSql, $finSql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $detalles = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+
+        return is_array($detalles) ? $detalles : [];
     }
 
     private function getConnection(): mysqli

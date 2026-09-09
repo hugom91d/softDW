@@ -9,6 +9,8 @@ class ProductoModel
         $porPagina = in_array((int) ($filtros['por_pagina'] ?? 10), [10, 20, 50, 100], true)
             ? (int) ($filtros['por_pagina'] ?? 10)
             : 10;
+        $ordenSolicitado = (string) ($filtros['orden'] ?? '');
+        $direccionSolicitada = strtolower((string) ($filtros['direccion'] ?? ''));
 
         $conn = $this->getConnection();
         $offset = ($pagina - 1) * $porPagina;
@@ -41,7 +43,20 @@ class ProductoModel
         $ordenSql = $fechaCreacionCampo !== null
             ? ' ORDER BY ' . $fechaCreacionCampo . ' DESC'
             : ' ORDER BY codigo ASC';
-        $sql = "SELECT codigo, " . $descripcionCampo . " AS descripcion, stock_uio, stock_baltra, stock_puerto_ayora FROM productos" . $whereSql . $ordenSql . " LIMIT ? OFFSET ?";
+        $ordenesPermitidos = [
+            'codigo' => 'codigo',
+            'descripcion' => $descripcionCampo,
+            'stock_uio' => 'stock_uio',
+            'stock_baltra' => 'stock_baltra',
+            'stock_puerto_ayora' => 'stock_puerto_ayora',
+            'estado' => 'estado',
+        ];
+        if (isset($ordenesPermitidos[$ordenSolicitado])) {
+            $direccion = $direccionSolicitada === 'asc' ? 'ASC' : 'DESC';
+            $ordenSql = ' ORDER BY ' . $ordenesPermitidos[$ordenSolicitado] . ' ' . $direccion . ', codigo ASC';
+        }
+
+        $sql = "SELECT codigo, " . $descripcionCampo . " AS descripcion, stock_uio, stock_baltra, stock_puerto_ayora, estado FROM productos" . $whereSql . $ordenSql . " LIMIT ? OFFSET ?";
 
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
@@ -88,6 +103,7 @@ class ProductoModel
                     'stock_uio' => $this->formatearCantidad($item['stock_uio'] ?? null),
                     'stock_baltra' => $this->formatearCantidad($item['stock_baltra'] ?? null),
                     'stock_puerto_ayora' => $this->formatearCantidad($item['stock_puerto_ayora'] ?? null),
+                    'estado' => strtoupper(trim((string) ($item['estado'] ?? ''))),
                 ];
             }, $items),
             'total' => $total,
@@ -339,7 +355,7 @@ class ProductoModel
         $descripcionCampo = $this->obtenerCampoDescripcion($conn);
         $selectDescripcion = $descripcionCampo !== null ? ", $descripcionCampo AS descripcion" : ", '' AS descripcion";
 
-        $sql = "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY RAND()";
+        $sql = "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE estado = 'A' AND codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY RAND()";
 
         if ($limite > 0) {
             $stmt = $conn->prepare($sql . ' LIMIT ?');

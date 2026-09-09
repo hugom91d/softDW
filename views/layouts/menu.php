@@ -52,6 +52,9 @@ if (session_status() === PHP_SESSION_NONE) {
         <li><a href="../views/stock.php"><i class="fas fa-boxes-stacked"></i><span>Stock</span></a></li>
         <?php endif; ?>
         <li><a href="../views/reposiciones.php"><i class="fas fa-right-left"></i><span>Reposiciones</span></a></li>
+        <?php if (($_SESSION['rol'] ?? '') !== 'operador'): ?>
+        <li><a href="../views/reportes.php"><i class="fas fa-chart-column"></i><span>Reportes</span></a></li>
+        <?php endif; ?>
     </ul>
     <div class="sidebar-footer">
         <?php if (($_SESSION['rol'] ?? '') === 'admin'): ?>

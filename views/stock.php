@@ -15,6 +15,8 @@ require_once __DIR__ . '/../models/ConfiguracionStockModel.php';
 $model = new ProductoModel();
 $configuracionStock = (new ConfiguracionStockModel())->obtener();
 $busqueda = trim((string) ($_GET['buscar'] ?? ''));
+$orden = (string) ($_GET['orden'] ?? '');
+$direccion = strtolower((string) ($_GET['direccion'] ?? '')) === 'asc' ? 'asc' : 'desc';
 $porPagina = in_array((int) ($_GET['por_pagina'] ?? 10), [10, 20, 50, 100], true)
     ? (int) ($_GET['por_pagina'] ?? 10)
     : 10;
@@ -24,6 +26,8 @@ $resultado = $model->listarStock([
     'buscar' => $busqueda,
     'pagina' => $pagina,
     'por_pagina' => $porPagina,
+    'orden' => $orden,
+    'direccion' => $direccion,
 ]);
 $stock = $resultado['items'];
 $totalProductos = (int) $resultado['total'];
@@ -38,6 +42,24 @@ $claseStock = static function ($cantidad) use ($configuracionStock): string {
     }
 
     return $cantidad < $configuracionStock['limite_advertencia'] ? 'stock-advertencia' : 'stock-disponible';
+};
+$enlaceOrden = static function (string $columna) use ($orden, $direccion, $busqueda, $porPagina): string {
+    $nuevaDireccion = $orden === $columna && $direccion === 'asc' ? 'desc' : 'asc';
+
+    return '?' . http_build_query([
+        'buscar' => $busqueda,
+        'por_pagina' => $porPagina,
+        'pagina' => 1,
+        'orden' => $columna,
+        'direccion' => $nuevaDireccion,
+    ]);
+};
+$indicadorOrden = static function (string $columna) use ($orden, $direccion): string {
+    if ($orden !== $columna) {
+        return '↕';
+    }
+
+    return $direccion === 'asc' ? '↑' : '↓';
 };
 ?>
 <!DOCTYPE html>
@@ -83,20 +105,31 @@ $claseStock = static function ($cantidad) use ($configuracionStock): string {
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Código</th>
-                            <th>Descripción</th>
-                            <th>Stock UIO</th>
-                            <th>Stock Baltra</th>
-                            <th>Stock Puerto Ayora</th>
+                            <?php foreach ([
+                                'codigo' => 'Código',
+                                'descripcion' => 'Descripción',
+                                'stock_uio' => 'Stock UIO',
+                                'stock_baltra' => 'Stock Baltra',
+                                'stock_puerto_ayora' => 'Stock Puerto Ayora',
+                                'estado' => 'Estado',
+                            ] as $columna => $etiqueta): ?>
+                                <th aria-sort="<?= $orden === $columna ? ($direccion === 'asc' ? 'ascending' : 'descending') : 'none' ?>">
+                                    <a class="stock-sort-link" href="<?= htmlspecialchars($enlaceOrden($columna)) ?>">
+                                        <?= htmlspecialchars($etiqueta) ?>
+                                        <span aria-hidden="true"><?= $indicadorOrden($columna) ?></span>
+                                    </a>
+                                </th>
+                            <?php endforeach; ?>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($stock)): ?>
                             <tr class="pagination-empty">
-                                <td colspan="6" class="empty-state">No se encontraron productos.</td>
+                                <td colspan="7" class="empty-state">No se encontraron productos.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($stock as $indice => $item): ?>
+                                <?php $estado = strtoupper(trim((string) ($item['estado'] ?? ''))); ?>
                                 <tr>
                                     <td><?= (($pagina - 1) * $porPagina) + $indice + 1 ?></td>
                                     <td><?= htmlspecialchars($item['codigo']) ?></td>
@@ -104,6 +137,7 @@ $claseStock = static function ($cantidad) use ($configuracionStock): string {
                                     <td><span class="stock-value <?= $claseStock($item['stock_uio'] ?? 0) ?>" style="--stock-color: <?= htmlspecialchars($configuracionStock['color_' . substr($claseStock($item['stock_uio'] ?? 0), 6)]) ?>"><?= number_format((float) ($item['stock_uio'] ?? 0), 0) ?></span></td>
                                     <td><span class="stock-value <?= $claseStock($item['stock_baltra'] ?? 0) ?>" style="--stock-color: <?= htmlspecialchars($configuracionStock['color_' . substr($claseStock($item['stock_baltra'] ?? 0), 6)]) ?>"><?= number_format((float) ($item['stock_baltra'] ?? 0), 0) ?></span></td>
                                     <td><span class="stock-value <?= $claseStock($item['stock_puerto_ayora'] ?? 0) ?>" style="--stock-color: <?= htmlspecialchars($configuracionStock['color_' . substr($claseStock($item['stock_puerto_ayora'] ?? 0), 6)]) ?>"><?= number_format((float) ($item['stock_puerto_ayora'] ?? 0), 0) ?></span></td>
+                                    <td><span class="producto-estado <?= $estado === 'A' ? 'estado-activo' : 'estado-inactivo' ?>"><span class="estado-semaforo" aria-hidden="true"></span><?= $estado === 'A' ? 'Activo' : 'Inactivo' ?></span></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -113,6 +147,8 @@ $claseStock = static function ($cantidad) use ($configuracionStock): string {
                 <div class="stock-pagination-bar">
                     <form method="GET" class="page-size-form">
                         <input type="hidden" name="buscar" value="<?= htmlspecialchars($busqueda) ?>">
+                        <input type="hidden" name="orden" value="<?= htmlspecialchars($orden) ?>">
+                        <input type="hidden" name="direccion" value="<?= htmlspecialchars($direccion) ?>">
                         <input type="hidden" name="pagina" value="1">
                         <label for="porPagina">Mostrar</label>
                         <select id="porPagina" name="por_pagina" onchange="this.form.requestSubmit()">
@@ -127,6 +163,8 @@ $claseStock = static function ($cantidad) use ($configuracionStock): string {
                         <form method="GET" class="table-pagination stock-table-pagination" aria-label="Paginación de stock">
                             <input type="hidden" name="buscar" value="<?= htmlspecialchars($busqueda) ?>">
                             <input type="hidden" name="por_pagina" value="<?= $porPagina ?>">
+                            <input type="hidden" name="orden" value="<?= htmlspecialchars($orden) ?>">
+                            <input type="hidden" name="direccion" value="<?= htmlspecialchars($direccion) ?>">
                             <button type="submit" name="pagina" value="<?= $pagina - 1 ?>" class="pagination-button" <?= $pagina === 1 ? 'disabled' : '' ?>>Anterior</button>
                             <span class="pagination-status">Página <?= $pagina ?> de <?= $totalPaginas ?></span>
                             <button type="submit" name="pagina" value="<?= $pagina + 1 ?>" class="pagination-button" <?= $pagina === $totalPaginas ? 'disabled' : '' ?>>Siguiente</button>
