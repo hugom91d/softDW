@@ -47,14 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        fila.querySelector('.stock-dw').textContent = resultado.stock_uio ?? 0;
+        fila.querySelector('.stock-baltra').textContent = resultado.stock_baltra ?? 0;
+        fila.querySelector('.stock-ayora').textContent = resultado.stock_puerto_ayora ?? 0;
+
         if (resultado.error) {
             fila.querySelector('.stock-estado').textContent = `Error: ${resultado.error}`;
             return;
         }
 
-        fila.querySelector('.stock-dw').textContent = resultado.stock_uio ?? 0;
-        fila.querySelector('.stock-baltra').textContent = resultado.stock_baltra ?? 0;
-        fila.querySelector('.stock-ayora').textContent = resultado.stock_puerto_ayora ?? 0;
         fila.querySelector('.stock-estado').textContent = resultado.actualizado ? 'Sincronizado' : 'Sin cambios';
     }
 
@@ -63,38 +64,72 @@ document.addEventListener('DOMContentLoaded', function() {
         stockSyncBody.innerHTML = '';
         iniciarTimer();
 
+        let productos = [];
+
         try {
             const respuestaPendientes = await fetch('../public/index.php?controller=producto&action=productosPendientesStock');
             if (!respuestaPendientes.ok) {
                 throw new Error(`HTTP ${respuestaPendientes.status}`);
             }
 
-            const productos = await respuestaPendientes.json();
+            productos = await respuestaPendientes.json();
 
             if (!Array.isArray(productos) || productos.length === 0) {
                 stockSyncBody.innerHTML = '<tr><td colspan="6">No hay productos con código de stock por sincronizar.</td></tr>';
                 return;
             }
 
-            for (const producto of productos) {
+            productos.forEach(producto => {
                 agregarFila(producto);
-
                 const fila = document.getElementById(`fila-${producto.codigo}`);
                 if (fila) {
                     fila.querySelector('.stock-estado').textContent = 'Sincronizando...';
                 }
+            });
 
-                try {
-                    const url = `../public/index.php?controller=producto&action=sincronizarStockUno&codigo=${encodeURIComponent(producto.codigo)}&codigoStock=${encodeURIComponent(producto.codigoStock)}`;
-                    const respuesta = await fetch(url);
-                    const resultado = await respuesta.json();
-                    actualizarFila(producto.codigo, resultado);
-                } catch (errorItem) {
-                    actualizarFila(producto.codigo, { error: errorItem.message });
-                }
+            // Se envían todos los productos en una sola petición: la API se consulta en
+            // paralelo (curl_multi) en el servidor en lugar de una petición por producto.
+            const respuesta = await fetch('../public/index.php?controller=producto&action=sincronizarStockLote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productos })
+            });
+
+            if (!respuesta.ok) {
+                throw new Error(`HTTP ${respuesta.status}`);
             }
+
+            const texto = await respuesta.text();
+            let resultados;
+            try {
+                resultados = JSON.parse(texto);
+            } catch (errorParseo) {
+                // Respuesta no era JSON válido (p.ej. un warning de PHP mezclado): se marca
+                // cada producto en 0 con error y se continúa en vez de romper la tabla completa.
+                resultados = productos.map(producto => ({
+                    codigo: producto.codigo,
+                    actualizado: false,
+                    stock_uio: 0,
+                    stock_baltra: 0,
+                    stock_puerto_ayora: 0,
+                    error: 'Respuesta inválida del servidor'
+                }));
+            }
+
+            if (!Array.isArray(resultados)) {
+                resultados = [];
+            }
+
+            resultados.forEach(resultado => actualizarFila(resultado.codigo, resultado));
         } catch (error) {
-            stockSyncBody.innerHTML = `<tr><td colspan="6">Error: ${error.message}</td></tr>`;
+            (Array.isArray(productos) ? productos : []).forEach(producto => actualizarFila(producto.codigo, {
+                codigo: producto.codigo,
+                actualizado: false,
+                stock_uio: 0,
+                stock_baltra: 0,
+                stock_puerto_ayora: 0,
+                error: error.message
+            }));
         } finally {
             detenerTimer();
             btnReiniciar.disabled = false;

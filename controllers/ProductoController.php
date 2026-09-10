@@ -94,5 +94,44 @@ class ProductoController
         $model = new ProductoModel();
         echo json_encode($model->sincronizarStockUnProducto($codigo, $codigoStock), JSON_PRETTY_PRINT);
     }
+
+    public function sincronizarStockLote()
+    {
+        header('Content-Type: application/json');
+
+        if (($_SESSION['rol'] ?? '') !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['error' => 'Acceso no autorizado']);
+            return;
+        }
+
+        $entrada = json_decode(file_get_contents('php://input'), true);
+        $productos = is_array($entrada['productos'] ?? null) ? $entrada['productos'] : [];
+
+        if (empty($productos)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Debe indicar el arreglo de productos']);
+            return;
+        }
+
+        // Se limpia cualquier salida previa (warnings/notices) para no corromper el JSON de respuesta.
+        ob_start();
+        try {
+            $model = new ProductoModel();
+            $resultado = $model->sincronizarStockLote($productos);
+        } catch (Throwable $e) {
+            $resultado = array_map(fn($p) => [
+                'codigo' => $p['codigo'] ?? '',
+                'actualizado' => false,
+                'stock_uio' => 0,
+                'stock_baltra' => 0,
+                'stock_puerto_ayora' => 0,
+                'error' => $e->getMessage(),
+            ], $productos);
+        }
+        ob_end_clean();
+
+        echo json_encode($resultado, JSON_PRETTY_PRINT);
+    }
 }
 

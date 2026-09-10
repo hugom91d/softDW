@@ -313,26 +313,41 @@ class ProductoModel
         $noEncontrados = [];
         $errores = [];
 
+        // Las búsquedas se resuelven en paralelo (curl_multi, por chunks) en vez de
+        // una petición HTTP por código, lo cual es indispensable con miles de productos.
+        $codigosLista = array_map(fn($item) => $item['codigo'], $codigos);
+        $encontrados = $api->buscarProductosPorCodigosEnLote('stock', $codigosLista);
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            "UPDATE productos SET codigoStock = ? WHERE codigo = ? AND (codigoStock IS NULL OR codigoStock = '')"
+        );
+
+        $conn->begin_transaction();
         foreach ($codigos as $item) {
             $codigo = $item['codigo'];
-            try {
-                $producto = $api->buscarProductoPorCodigo('stock', $codigo);
-            } catch (Exception $e) {
-                $errores[] = $codigo;
-                continue;
-            }
+            $idStock = trim((string) ($encontrados[$codigo] ?? ''));
 
-            $idStock = trim((string) ($producto['id'] ?? ''));
             if ($idStock === '') {
                 $noEncontrados[] = $codigo;
                 continue;
             }
 
-            if ($this->actualizarCodigoStock($codigo, $idStock)) {
+            $actualizado = false;
+            if ($stmt) {
+                $stmt->bind_param('ss', $idStock, $codigo);
+                $actualizado = $stmt->execute() && $stmt->affected_rows > 0;
+            }
+
+            if ($actualizado) {
                 $actualizados[] = ['codigo' => $codigo, 'codigoStock' => $idStock];
             } else {
                 $errores[] = $codigo;
             }
+        }
+        $conn->commit();
+        if ($stmt) {
+            $stmt->close();
         }
 
         return [
@@ -355,7 +370,7 @@ class ProductoModel
         $descripcionCampo = $this->obtenerCampoDescripcion($conn);
         $selectDescripcion = $descripcionCampo !== null ? ", $descripcionCampo AS descripcion" : ", '' AS descripcion";
 
-        $sql = "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE estado = 'A' AND codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY RAND()";
+        $sql = "SELECT codigo, codigoStock" . $selectDescripcion . " FROM productos WHERE estado = 'A' AND codigoStock IS NOT NULL AND codigoStock <> '' ORDER BY " . ($limite > 0 ? 'RAND()' : 'codigo ASC');
 
         if ($limite > 0) {
             $stmt = $conn->prepare($sql . ' LIMIT ?');
@@ -436,6 +451,138 @@ class ProductoModel
             'stock_uio' => $stock['stock_uio'],
             'stock_baltra' => $stock['stock_baltra'],
             'stock_puerto_ayora' => $stock['stock_puerto_ayora'],
+        ];
+    }
+
+    /**
+     * Sincroniza el stock de varios productos en una sola pasada: consulta la API
+     * en paralelo (curl_multi) y aplica todas las actualizaciones en una única transacción.
+     * $productos: array de ['codigo' => ..., 'codigoStock' => ...]
+     */
+    public function sincronizarStockLote(array $productos): array
+    {
+        require_once __DIR__ . '/../services/ProductoApi.php';
+
+        $productos = array_values(array_filter($productos, function ($p) {
+            return trim((string) ($p['codigo'] ?? '')) !== '' && trim((string) ($p['codigoStock'] ?? '')) !== '';
+        }));
+
+        if (empty($productos)) {
+            return [];
+        }
+
+        $codigosStock = array_map(fn($p) => trim((string) $p['codigoStock']), $productos);
+
+        $api = new ProductoApi();
+
+        try {
+            $respuestasPorCodigoStock = $api->consultarStockPorCodigosEnLote($codigosStock);
+        } catch (Exception $e) {
+            return array_map(fn($p) => [
+                'codigo' => $p['codigo'],
+                'actualizado' => false,
+                'error' => $e->getMessage(),
+            ], $productos);
+        }
+
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare(
+            'UPDATE productos SET stock_uio = ?, stock_baltra = ?, stock_puerto_ayora = ? WHERE codigo = ?'
+        );
+
+        $resultados = [];
+        $conn->begin_transaction();
+
+        foreach ($productos as $producto) {
+            $codigo = trim((string) $producto['codigo']);
+            $codigoStock = trim((string) $producto['codigoStock']);
+            $bodegas = $respuestasPorCodigoStock[$codigoStock] ?? null;
+
+            if (!is_array($bodegas)) {
+                $resultados[] = ['codigo' => $codigo, 'actualizado' => false, 'error' => 'Respuesta inválida de la API'];
+                continue;
+            }
+
+            $stock = [
+                'stock_uio' => 0.0,
+                'stock_baltra' => 0.0,
+                'stock_puerto_ayora' => 0.0,
+            ];
+
+            foreach ($bodegas as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+
+                $columna = $this->mapearColumnaBodega((string) ($item['bodega_nombre'] ?? ''));
+                if ($columna !== null) {
+                    $stock[$columna] = (float) ($item['cantidad'] ?? 0);
+                }
+            }
+
+            $actualizado = false;
+            if ($stmt) {
+                $stmt->bind_param('ddds', $stock['stock_uio'], $stock['stock_baltra'], $stock['stock_puerto_ayora'], $codigo);
+                $actualizado = $stmt->execute() && $stmt->affected_rows > 0;
+            }
+
+            $resultados[] = [
+                'codigo' => $codigo,
+                'actualizado' => $actualizado,
+                'stock_uio' => $stock['stock_uio'],
+                'stock_baltra' => $stock['stock_baltra'],
+                'stock_puerto_ayora' => $stock['stock_puerto_ayora'],
+            ];
+        }
+
+        $conn->commit();
+        if ($stmt) {
+            $stmt->close();
+        }
+
+        return $resultados;
+    }
+
+    /**
+     * Sincroniza TODO el stock pendiente (miles de productos) procesando por chunks:
+     * cada chunk resuelve sus llamadas a la API en paralelo y confirma su propia
+     * transacción, evitando cargar en memoria los resultados de toda la tabla a la vez.
+     * Pensado para ejecutarse por CLI (sin límite de tiempo de una petición web).
+     */
+    public function sincronizarTodoStockPendiente(int $tamanoLote = 200, ?callable $onLote = null): array
+    {
+        $productos = $this->obtenerProductosPendientesStock(0);
+
+        $total = count($productos);
+        $actualizados = 0;
+        $sinCambios = 0;
+        $errores = 0;
+        $procesados = 0;
+
+        foreach (array_chunk($productos, max(1, $tamanoLote)) as $chunk) {
+            $resultados = $this->sincronizarStockLote($chunk);
+
+            foreach ($resultados as $resultado) {
+                if (!empty($resultado['error'])) {
+                    $errores++;
+                } elseif (!empty($resultado['actualizado'])) {
+                    $actualizados++;
+                } else {
+                    $sinCambios++;
+                }
+            }
+
+            $procesados += count($chunk);
+            if ($onLote !== null) {
+                $onLote($procesados, $total);
+            }
+        }
+
+        return [
+            'total' => $total,
+            'actualizados' => $actualizados,
+            'sin_cambios' => $sinCambios,
+            'errores' => $errores,
         ];
     }
 
