@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const rows = Array.from(table.querySelectorAll('tbody tr[data-sede]'));
             rows.forEach(row => {
                 row.classList.toggle('sede-hidden', row.dataset.sede !== sede);
-            });
+            }); 
 
             const hasVisibleRows = rows.some(row => row.dataset.sede === sede);
             let emptyRow = table.querySelector('.sede-empty-state');
@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <option value="No hay stock en GPS">No hay stock en GPS</option>
                     <option value="Solicitar stock a Quito">Solicitar stock a Quito</option>
                     <option value="Se termino prenda en descuento">Se termino prenda en descuento</option>
+                    <option value="Devolución de prenda">Devolución de prenda</option>
                 </select>
                 <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
             </div>

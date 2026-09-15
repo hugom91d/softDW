@@ -121,7 +121,8 @@ class ProductoModel
                 SUM(CASE WHEN COALESCE(stock_uio, 0) < ? THEN 1 ELSE 0 END) AS uio,
                 SUM(CASE WHEN COALESCE(stock_baltra, 0) < ? THEN 1 ELSE 0 END) AS baltra,
                 SUM(CASE WHEN COALESCE(stock_puerto_ayora, 0) < ? THEN 1 ELSE 0 END) AS ayora
-            FROM productos'
+            FROM productos
+            WHERE estado = \'A\''
         );
 
         if (!$stmt) {
