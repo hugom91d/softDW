@@ -123,15 +123,14 @@ document.addEventListener('DOMContentLoaded', function() {
         formRow.className = 'no-repuesto-row';
         const td = document.createElement('td');
         td.colSpan = 6;
+        const opciones = Array.isArray(window.opcionesNoRepuesto) ? window.opcionesNoRepuesto : [];
+        const opcionesHtml = opciones.map(opcion => `<option value="${escapeHtml(opcion)}">${escapeHtml(opcion)}</option>`).join('');
         td.innerHTML = `
             <div class="no-repuesto-form">
                 <label>Observación</label>
                 <select id="noRepuestoInput" required>
                     <option value="">Selecciona una opción</option>
-                    <option value="No hay stock en GPS">No hay stock en GPS</option>
-                    <option value="Solicitar stock a Quito">Solicitar stock a Quito</option>
-                    <option value="Se termino prenda en descuento">Se termino prenda en descuento</option>
-                    <option value="Devolución de prenda">Devolución de prenda</option>
+                    ${opcionesHtml}
                 </select>
                 <button type="button" class="btn-ok" id="saveNoRepuestoButton">OK</button>
             </div>
@@ -186,6 +185,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     showSystemNotification('Error al guardar la observación.');
                 });
         });
+    }
+
+    function escapeHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value;
+        return div.innerHTML;
     }
 
     function closeModal() {

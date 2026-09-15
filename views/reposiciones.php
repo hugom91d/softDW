@@ -8,8 +8,10 @@ if (!isset($_SESSION['cedula'])) {
 require_once __DIR__ . '/../services/HttpClient.php';
 require_once __DIR__ . '/../services/FacturaApi.php';
 require_once __DIR__ . '/../models/FacturaModel.php';
+require_once __DIR__ . '/../models/OpcionesNoRepuestoModel.php';
 
 $model = new FacturaModel();
+$opcionesNoRepuesto = (new OpcionesNoRepuestoModel())->obtenerActivas();
 
 if (isset($_GET['action']) && $_GET['action'] === 'detalle' && isset($_GET['id_factura'])) {
     $idFactura = intval($_GET['id_factura']);
@@ -290,6 +292,7 @@ $facturasAnteriores = array_merge($facturasPtoAyoraAnteriores, $facturasBaltraAn
         </div>
     </div>
 
+    <script>window.opcionesNoRepuesto = <?= json_encode($opcionesNoRepuesto, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
     <script src="../public/js/reposiciones.js"></script>
     <script src="../public/js/menu.js"></script>
 </body>

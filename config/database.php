@@ -73,3 +73,25 @@ $conn->query(
         limite_stock INT UNSIGNED NOT NULL DEFAULT 5
     )"
 );
+
+$conn->query(
+    "CREATE TABLE IF NOT EXISTS opciones_no_repuesto (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        texto VARCHAR(255) NOT NULL,
+        activo TINYINT(1) NOT NULL DEFAULT 1,
+        orden INT UNSIGNED NOT NULL DEFAULT 0,
+        UNIQUE KEY uq_opciones_no_repuesto_texto (texto)
+    )"
+);
+
+$resultadoOpcionesNoRepuesto = $conn->query('SELECT COUNT(*) AS total FROM opciones_no_repuesto');
+$totalOpcionesNoRepuesto = $resultadoOpcionesNoRepuesto ? (int) ($resultadoOpcionesNoRepuesto->fetch_assoc()['total'] ?? 0) : 0;
+if ($totalOpcionesNoRepuesto === 0) {
+    $conn->query(
+        "INSERT INTO opciones_no_repuesto (texto, orden) VALUES
+        ('No hay stock en GPS', 1),
+        ('Solicitar stock a Quito', 2),
+        ('Se termino prenda en descuento', 3),
+        ('Devolución de prenda', 4)"
+    );
+}

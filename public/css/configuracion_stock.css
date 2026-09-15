@@ -45,6 +45,49 @@
     border-color: #fca5a5;
 }
 
+.opciones-config-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.opcion-config-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.opcion-config-row input {
+    flex: 1;
+    font-size: 0.9rem;
+    padding: 9px 12px;
+}
+
+.btn-remove-option {
+    flex: 0 0 44px;
+    width: 44px;
+    margin-top: 0;
+    padding: 9px;
+    background: #000;
+    color: #b91c1c;
+}
+
+.btn-remove-option:hover,
+.opciones-config-card .button-group button:hover {
+    background: #e60000;
+    color: #fff;
+}
+
+.opciones-config-card .button-group {
+    justify-content: center;
+}
+
+.opciones-config-card .button-group button {
+    width: auto;
+    min-width: 190px;
+    margin-top: 1rem;
+    background: #000;
+    color: #e60000;
+}
+
 @media (max-width: 600px) {
     .stock-config-grid {
         grid-template-columns: 1fr;

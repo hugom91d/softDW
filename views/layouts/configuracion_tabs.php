@@ -11,4 +11,8 @@
         <i class="fas fa-rotate"></i>
         <span>Sincronización</span>
     </a>
+    <a class="<?= ($configuracionActiva ?? '') === 'no_repuesto' ? 'active' : '' ?>" href="configuracion_no_repuesto.php">
+        <i class="fas fa-list-check"></i>
+        <span>No repuesto</span>
+    </a>
 </nav>
