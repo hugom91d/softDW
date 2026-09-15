@@ -67,12 +67,21 @@
     margin-top: 0;
     padding: 9px;
     background: #000;
-    color: #b91c1c;
+    color: #fff;
 }
 
 .btn-remove-option:hover,
 .opciones-config-card .button-group button:hover {
     background: #e60000;
+    color: #000;
+}
+
+.opciones-config-card button i {
+    color: #e60000;
+}
+
+.btn-remove-option:hover i,
+.opciones-config-card .button-group button:hover i {
     color: #fff;
 }
 
@@ -85,7 +94,7 @@
     min-width: 190px;
     margin-top: 1rem;
     background: #000;
-    color: #e60000;
+    color: #fff;
 }
 
 @media (max-width: 600px) {
